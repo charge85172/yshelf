@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YShelf - Jouw Digitale Boekenkast</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header>
+    <h1>📚 YShelf</h1>
+    <nav>
+        <a href="#">Mijn Boekenkast</a>
+        <a href="#">Zoeken</a>
+        <a href="#">Login</a>
+    </nav>
+</header>
+
+<main>
+    <section id="shelf-section">
+        <h2>Mijn Boekenkast</h2>
+        <div id="book-shelf" class="book-grid">
+            <!-- Boeken worden hier dynamisch ingeladen door JavaScript -->
+        </div>
+    </section>
+
+    <section id="add-book-section">
+        <h2>Voeg een boek toe</h2>
+        <form id="add-book-form">
+            <input type="text" id="book-title" placeholder="Titel" required>
+            <input type="text" id="book-author" placeholder="Auteur" required>
+            <input type="text" id="book-cover" placeholder="URL van coverafbeelding">
+            <button type="submit">Toevoegen</button>
+        </form>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2024 YShelf. Alle rechten voorbehouden.</p>
+</footer>
+
+<!-- JavaScript files -->
+<script src="js/Book.js"></script>
+<script src="js/Shelf.js"></script>
+<script src="js/UI.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
