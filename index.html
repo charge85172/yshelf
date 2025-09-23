@@ -24,15 +24,39 @@
         </div>
     </section>
 
-    <section id="add-book-section">
-        <h2>Voeg een boek toe</h2>
-        <form id="add-book-form">
-            <input type="text" id="book-title" placeholder="Titel" required>
-            <input type="text" id="book-author" placeholder="Auteur" required>
-            <input type="text" id="book-cover" placeholder="URL van coverafbeelding">
-            <button type="submit">Toevoegen</button>
-        </form>
-    </section>
+
+    <!--    <section id="add-book-section">-->
+    <!--        <h2>Voeg een boek toe</h2>-->
+    <!--        <form id="add-book-form">-->
+    <!--            <input type="text" id="book-title" placeholder="Titel" required>-->
+    <!--            <input type="text" id="book-author" placeholder="Auteur" required>-->
+    <!--            <input type="text" id="book-cover" placeholder="URL van coverafbeelding">-->
+    <!--            <button type="submit">Toevoegen</button>-->
+
+    <!--        </form>-->
+    <!--    </section>-->
+
+    <div class="bookshelf-search">
+        <div class="searchbar">
+            <input type="text" id="searchInput" placeholder="Zoek een boek">
+            <button id="searchButton" type="button">Zoeken</button>
+            <div class="search-box" style="position: absolute; top: 20px; right: 0;">
+                <!--                <a href="index.php">Terug naar boekenkast</a>-->
+            </div>
+        </div>
+        <div class="results-container">
+            <div id="results" class="shelf-rows"></div>
+        </div>
+    </div>
+
+    <div id="bookList"></div>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content" id="modalContent">
+        </div>
+    </div>
+
 </main>
 
 <footer>
