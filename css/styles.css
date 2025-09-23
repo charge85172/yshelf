@@ -93,6 +93,64 @@ main {
     cursor: pointer;
 }
 
+#chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    height: 400px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    z-index: 9999;
+}
+
+#chat-widget.collapsed {
+    height: 40px;
+    width: 40px;
+}
+
+#chat-header {
+    background: #715C4F;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+
+#chat-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+#chat-input input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    outline: none;
+}
+
+#chat-input button {
+    border: none;
+    background: #715C4F;
+    color: white;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
 footer {
     text-align: center;
     padding: 1rem;
