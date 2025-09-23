@@ -97,8 +97,8 @@ main {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 300px;
-    height: 400px;
+    width: 400px;
+    height: 500px;
     background: white;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -107,6 +107,7 @@ main {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-family: Arial, sans-serif;
     overflow: hidden;
+    transition: 0.3s ease-in;
     z-index: 9999;
 }
 
@@ -131,7 +132,7 @@ main {
 }
 
 #chat-box {
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     padding: 10px;
     display: flex;
