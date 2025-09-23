@@ -123,6 +123,8 @@ function displayBookDetails(book) {
     const {title, authors, description, imageLinks, pageCount, categories, language, publishedDate} = book.volumeInfo;
     const modalContent = document.querySelector("#modalContent");
 
+    const isRead = getBookReadStatus(book.id);
+
     modalContent.innerHTML = `
         <span class="close">&times;</span>
         <h2>${title || "Geen titel"}</h2>
@@ -133,7 +135,9 @@ function displayBookDetails(book) {
         <p><strong>Pagina's:</strong> ${pageCount || "Informatie niet beschikbaar"}</p>
          <p><strong>Taal:</strong> ${language} </p>
           <p><strong>Release datum:</strong> ${publishedDate} </p>
-        <button id="addToShelfBtn" class="detailPageButton">Voeg toe aan boekenkast</button>
+        <button id="addToShelfBtn" class="detailPageButton">+ Voeg toe aan leeslijst</button>
+        <button id="BookReadBtn" class="detailPageButton">${isRead ? "Markeer als ongelezen" : "Markeer als gelezen"}</button>
+          <button id="DeleteBookBtn" class="detailPageButton"> &#xf2ed Verwijder uit leeslijst</button>
     `;
 
     // Open modal
@@ -149,6 +153,8 @@ function displayBookDetails(book) {
 
     // Voeg toe knop
     modalContent.querySelector("#addToShelfBtn").addEventListener("click", () => addToBookshelf(book.id));
+    modalContent.querySelector("#BookReadBtn").addEventListener("click", (e) => bookRead(book.id, e.target));
+
 }
 
 
@@ -158,6 +164,41 @@ function scrollLeft() {
 
 function scrollRight() {
     document.getElementById('results').scrollBy({left: 300, behavior: 'smooth'})
+}
+
+function addToBookshelf(book) {
+    console.log(`Boek toegevoegd`)
+
+}
+
+function setBookReadStatus(bookId, isRead) {
+    const readBooks = JSON.parse(localStorage.getItem("readBooks")) || {};
+    readBooks[bookId] = isRead;
+    localStorage.setItem("readBooks", JSON.stringify(readBooks));
+}
+
+function getBookReadStatus(bookId) {
+    const readBooks = JSON.parse(localStorage.getItem("readBooks")) || {};
+    return readBooks[bookId] || false;
+    //altijd eerst op niet gelezen
+}
+
+
+function bookRead(bookId, button) {
+    console.log("book is gelezen")
+
+    console.log(`Boek ${bookId} status veranderd`);
+
+    const isCurrentlyRead = getBookReadStatus(bookId);
+    const newStatus = !isCurrentlyRead;
+
+    setBookReadStatus(bookId, newStatus);
+
+    button.textContent = newStatus ? "Markeer als ongelezen" : "Markeer als gelezen";
+
+    console.log(`Boek ${bookId} is nu ${newStatus ? "gelezen" : "ongelezen"}`);
+
+
 }
 
 
