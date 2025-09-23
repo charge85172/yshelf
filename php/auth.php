@@ -3,11 +3,55 @@
 
 require_once '../includes/database.php';
 
-if (isset($_POST['submit'])) {
-    print_r($_POST['submit']);
+if (isset($_POST['submit-login'])) {
+    print "HELp";
+
 }
+if (isset($_POST['submit-register'])) {
 
 
+    $username = mysqli_escape_string($db, $_POST['username']);
+    $password = mysqli_escape_string($db, $_POST['password']);
+    $dubblePassword = mysqli_escape_string($db, $_POST['passwordCheck']);
+
+    $errors = [];
+
+    if ($username === "") {
+        $errors['username'] = 'U moet een gebruikersnaam invoeren.';
+    }
+    if ($password === "") {
+        $errors['password'] = 'U moet een wachtwoord invoeren.';
+    }
+    if ($dubblePassword === "") {
+        $errors['dubblePassword'] = 'U moet uw wachtwoord opnieuw invoeren ';
+    }
+    if ($password !== $dubblePassword) {
+        $errors['claimedPassword'] = 'Uw wachtwoord komt niet overeen';
+
+    }
+
+    $sql = " SELECT `username`  FROM users WHERE `username` = '$username'";
+    $result = mysqli_query($db, $sql)
+    or die('Error ' . mysqli_error($db) . 'with query ' . $sql);
+    if (mysqli_num_rows($result) > 0) {
+        $errors['dubbleName'] = 'De gebruikersnaam is al in gebruikt';
+    }
+
+    if (empty($errors)) {
+        $password = password_hash($password, PASSWORD_DEFAULT);
+
+        $query = "
+    INSERT INTO `users`(`username`, `password`)
+    VALUES ('$username', '$password' )
+    ";
+        $result = mysqli_query($db, $query)
+        or die('Error ' . mysqli_error($db) . 'with query ' . $query);
+
+        header('location: login.php');
+        exit;
+
+    }
+}
 mysqli_close($db);
 ?>
 
@@ -39,25 +83,22 @@ mysqli_close($db);
     <div class="hidden" id="registring">
         <form action="" method="post">
 
-            <label for="firstName">Voornaam</label>
-            <input id="firstName" type="text" name="firstName">
-
-            <label for="lastName">Achternaam</label>
-            <input id="lastName" type="text" name="lastName">
-
-            <label for="userName">Gebruikers-naam</label>
-            <input id="userName" type="text" name="userName">
-
-            <label for="email">Email</label>
-            <input id="email" type="text" name="email">
+            <label for="userName">Gebruikersnaam</label>
+            <input id="userName" type="text" name="username">
+            <p>  <?= $errors['username'] ?? '' ?> </p>
+            <p>  <?= $errors['dubbleName'] ?? '' ?> </p>
 
             <label for="password">Wachtwoord</label>
-            <input id="password" type="text" name="passWord">
+            <input id="password" type="password" name="password">
+            <p>  <?= $errors['password'] ?? '' ?> </p>
+            <p>  <?= $errors['claimedPassword'] ?? '' ?> </p>
 
             <label for="checkPassword">Herhaal wachtwoord</label>
-            <input id="checkPassword" type="text" name="checkPassword">
+            <input id="checkPassword" type="password" name="passwordCheck">
+            <p>  <?= $errors['dubblePassword'] ?? '' ?> </p>
+            <p>  <?= $errors['claimedPassword'] ?? '' ?> </p>
 
-            <button name="submit" type="submit">Registreer</button>
+            <button id="registerButton" name="submit-register" type="submit">Registreer</button>
         </form>
     </div>
 
@@ -65,13 +106,13 @@ mysqli_close($db);
         <form action="" method="post">
 
 
-            <label>email</label>
-            <input>
+            <label for="loginUsername">Gebruikersnaam</label>
+            <input id="loginUsername" type="text" name="loginUsername">
 
-            <label>Wachtwoord</label>
-            <input>
+            <label for="loginPassword">Wachtwoord</label>
+            <input id="loginPassword" type="password" name="loginPassword">
 
-            <button name="submit">Inloggen</button>
+            <button name="submit-login" type="submit">Inloggen</button>
         </form>
     </div>
 </main>
