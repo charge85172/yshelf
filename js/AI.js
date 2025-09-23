@@ -19,8 +19,20 @@ document.getElementById("chat-header").onclick = () => {
 
 async function sendMessage() {
     const userText = document.getElementById("userInput").value;
-    const chatBox = document.getElementById("chat");
+    const chatBox = document.getElementById("chat-box");
 
+    if (!userText.trim()) return;
+
+    // Voeg bericht van gebruiker toe
+    const userMsg = document.createElement("div");
+    userMsg.classList.add("message", "user");
+    userMsg.textContent = userText;
+    chatBox.appendChild(userMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    document.getElementById("userInput").value = "";
+
+    // Verstuur naar server
     const response = await fetch("./php/chatbot.php", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -30,9 +42,17 @@ async function sendMessage() {
     const data = await response.json();
     console.log("API response:", data);
 
+    // Voeg bericht van bot toe
+    const botMsg = document.createElement("div");
+    botMsg.classList.add("message", "bot");
+
     if (data.choices && data.choices[0]) {
-        chatBox.textContent += "Bot: " + data.choices[0].message.content + "\n";
+        botMsg.textContent = data.choices[0].message.content;
     } else {
-        chatBox.textContent += "⚠️ Fout: " + JSON.stringify(data) + "\n";
+        botMsg.textContent = "⚠️ Fout: " + JSON.stringify(data);
     }
+
+    chatBox.appendChild(botMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
+
