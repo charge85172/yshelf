@@ -1,7 +1,7 @@
 <?php
 // Local hosting
 $host = "127.0.0.1";
-$database = "cle2";
+$database = "tle1";
 $user = "root";
 $password = "";
 
