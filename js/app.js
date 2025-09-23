@@ -120,7 +120,7 @@ function displayResults(data) {
 const modal = document.getElementById("myModal");
 
 function displayBookDetails(book) {
-    const {title, authors, description, imageLinks, pageCount} = book.volumeInfo;
+    const {title, authors, description, imageLinks, pageCount, categories, language, publishedDate} = book.volumeInfo;
     const modalContent = document.querySelector("#modalContent");
 
     modalContent.innerHTML = `
@@ -129,7 +129,10 @@ function displayBookDetails(book) {
         ${authors ? `<p><strong>Auteur(s):</strong> ${authors.join(", ")}</p>` : ""}
         ${imageLinks?.thumbnail ? `<img src="${imageLinks.thumbnail}" alt="${title}">` : ""}
         <p>${description || "Geen beschrijving beschikbaar."}</p>
+        <p><strong>Genre(s)</strong> ${categories} </p>
         <p><strong>Pagina's:</strong> ${pageCount || "Informatie niet beschikbaar"}</p>
+         <p><strong>Taal:</strong> ${language} </p>
+          <p><strong>Release datum:</strong> ${publishedDate} </p>
         <button id="addToShelfBtn" class="detailPageButton">Voeg toe aan boekenkast</button>
     `;
 

@@ -97,8 +97,8 @@ main {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 300px;
-    height: 400px;
+    width: 400px;
+    height: 500px;
     background: white;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -107,6 +107,7 @@ main {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-family: Arial, sans-serif;
     overflow: hidden;
+    transition: 0.3s ease-in;
     z-index: 9999;
 }
 
@@ -131,7 +132,7 @@ main {
 }
 
 #chat-box {
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     padding: 10px;
     display: flex;
@@ -188,35 +189,51 @@ footer {
 }
 
 
-/* The Modal (background) */
+/* De modal */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0, 0, 0); /* Fallback color */
-    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Modal Content/Box */
+/* Modal content */
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    color: #ffffff;
+    background-color: #83604A;
+    margin: 3% auto;
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
+    width: 80%;
+    border-radius: 12px;
 }
 
-/* The Close Button */
+/* sluit button */
 .close {
-    color: #aaa;
+    color: #ffffff;
     float: right;
     font-size: 28px;
     font-weight: bold;
+}
+
+h2 {
+    text-align: center;
+    font-size: 40px;
+    margin-top: -10px;
+}
+
+.detailPageButton {
+    border-radius: 12px;
+    border: 0;
+    padding: 10px;
+    background-color: #5F6F52;
+    color: #ffffff;
+    box-shadow: 1px 1px 5px #3c2f23;
 }
 
 .close:hover,
