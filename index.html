@@ -1,3 +1,27 @@
+<!--code voor friends page, index moet dan wel php zijn-->
+
+<!--<?php-->
+
+<!--/** @var mysqli $db */-->
+<!--require_once 'includes/database.php';-->
+<!--session_start();-->
+
+<!--$username = $_SESSION['username'];-->
+
+<!--$sql = "SELECT id FROM `users` WHERE username = '$username'";-->
+
+<!--$result_users = mysqli_query($db, $sql)-->
+<!--or die('Error ' . mysqli_error($db) . ' with query ' . $sql);-->
+
+<!--$user = mysqli_fetch_assoc($result_users);-->
+<!--$user_id = $user['id'];-->
+<!--print_r($user);-->
+
+<!--print_r($_SESSION)-->
+
+
+<!--?>-->
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -14,6 +38,8 @@
         <a href="#">Mijn Boekenkast</a>
         <a href="#">Zoeken</a>
         <a href="php/auth.php">Login</a>
+        <!--        ook voor friend page-->
+        <!--        <a href="php/friends.php?id=<?= $user_id ?>">Vrienden</a>-->
     </nav>
 </header>
 
