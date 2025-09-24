@@ -227,6 +227,36 @@ h2 {
     margin-top: -10px;
 }
 
+.detailsAuthor {
+    text-align: center;
+    font-size: 30px;
+    margin-top: -40px;
+}
+
+.detailsContainer {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.detailsImg {
+    flex: 1;
+    max-width: 25%;
+    border-radius: 8px;
+}
+
+.detailsDescriptionTitle {
+    font-size: 20px;
+}
+
+.detailsDescription {
+    flex: 1;
+    font-size: 15px;
+    text-align: left;
+    line-height: 1.4;
+}
+
 .detailPageButton {
     border-radius: 12px;
     border: 0;
@@ -234,6 +264,11 @@ h2 {
     background-color: #5F6F52;
     color: #ffffff;
     box-shadow: 1px 1px 5px #3c2f23;
+}
+
+.detailsDeleteImg {
+    width: 10px;
+    height: 10px;
 }
 
 .close:hover,

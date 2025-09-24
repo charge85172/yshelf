@@ -128,16 +128,20 @@ function displayBookDetails(book) {
     modalContent.innerHTML = `
         <span class="close">&times;</span>
         <h2>${title || "Geen titel"}</h2>
-        ${authors ? `<p><strong>Auteur(s):</strong> ${authors.join(", ")}</p>` : ""}
-        ${imageLinks?.thumbnail ? `<img src="${imageLinks.thumbnail}" alt="${title}">` : ""}
-        <p>${description || "Geen beschrijving beschikbaar."}</p>
-        <p><strong>Genre(s)</strong> ${categories} </p>
+        ${authors ? `<p class="detailsAuthor"><strong>Auteur(s):</strong> ${authors.join(", ")}</p>` : ""}
+        <div class="detailsContainer">
+        ${imageLinks?.thumbnail ? `<img class="detailsImg" src="${imageLinks.thumbnail}" alt="${title}">` : ""}
+         <div class="detailsDescription"> <strong class="detailsDescriptionTitle">Samenvatting:</strong>
+            ${description || "Geen beschrijving beschikbaar."}
+        </div>
+    </div>
+        <p><strong>Genre(s):</strong> ${categories} </p>
         <p><strong>Pagina's:</strong> ${pageCount || "Informatie niet beschikbaar"}</p>
          <p><strong>Taal:</strong> ${language} </p>
           <p><strong>Release datum:</strong> ${publishedDate} </p>
         <button id="addToShelfBtn" class="detailPageButton">+ Voeg toe aan leeslijst</button>
         <button id="BookReadBtn" class="detailPageButton">${isRead ? "Markeer als ongelezen" : "Markeer als gelezen"}</button>
-          <button id="DeleteBookBtn" class="detailPageButton"> &#xf2ed Verwijder uit leeslijst</button>
+          <button id="DeleteBookBtn" class="detailPageButton"><img class="detailsDeleteImg" src="/images/delete.png"> Verwijder uit leeslijst</button>
     `;
 
     // Open modal
