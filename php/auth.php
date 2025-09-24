@@ -319,7 +319,7 @@ mysqli_close($db);
             height: 35px;
             background: radial-gradient(circle, var(--knob-color-light) 0%, var(--knob-color-dark) 100%);
             border-radius: 50%;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.5), inset 1px 1px 2px #fff7d6;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5), inset 1px 1px 2px #fff7d6;
             /* Gebruik margin om de 3D-ruimte niet te verstoren */
             margin-top: -17.5px; /* De helft van de hoogte */
         }
@@ -400,6 +400,7 @@ mysqli_close($db);
             min-height: 1.2em;
             margin-top: 2px;
         }
+
         .general-error {
             text-align: center;
             font-weight: bold;
@@ -424,7 +425,8 @@ mysqli_close($db);
                 <form action="" method="post" class="auth-form" id="registring">
                     <h2>Registreer</h2>
                     <div class="form-group">
-                        <input id="userName" type="text" name="username" placeholder="Gebruikersnaam" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
+                        <input id="userName" type="text" name="username" placeholder="Gebruikersnaam"
+                               value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
                         <span class="error"><?= $errors['username'] ?? '' ?></span>
                         <span class="error"><?= $errors['dubbleName'] ?? '' ?></span>
                     </div>
@@ -451,7 +453,8 @@ mysqli_close($db);
                 <form action="" method="post" class="auth-form" id="log-in">
                     <h2>Log In</h2>
                     <div class="form-group">
-                        <input id="loginUsername" type="text" name="loginUsername" placeholder="Gebruikersnaam" value="<?= htmlspecialchars($_POST['loginUsername'] ?? '') ?>">
+                        <input id="loginUsername" type="text" name="loginUsername" placeholder="Gebruikersnaam"
+                               value="<?= htmlspecialchars($_POST['loginUsername'] ?? '') ?>">
                         <span class="error"><?= $loginErrors['loginUsernameError'] ?? '' ?></span>
                     </div>
                     <div class="form-group">

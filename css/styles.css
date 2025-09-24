@@ -93,6 +93,7 @@ main {
     cursor: pointer;
 }
 
+/* AI Chatbot */
 #chat-widget {
     position: fixed;
     bottom: 20px;
@@ -179,6 +180,8 @@ main {
     padding: 10px 15px;
     cursor: pointer;
 }
+
+/* End AI Chatbot */
 
 footer {
     text-align: center;
