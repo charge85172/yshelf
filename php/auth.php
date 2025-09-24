@@ -2,14 +2,48 @@
 /** @var mysqli $db */
 
 require_once '../includes/database.php';
+session_start();
 
 if (isset($_POST['submit-login'])) {
-    print "HELp";
 
+    $loginUsername = mysqli_escape_string($db, $_POST['loginUsername']);
+    $loginPassword = mysqli_escape_string($db, $_POST['loginPassword']);
+
+    if ($loginUsername == '') {
+        $errors['email'] = 'Uw email is verplicht';
+    }
+    if ($loginPassword == '') {
+        $errors['password'] = 'uw wachtwoord is verplicht';
+    }
+    if (empty($errors)) {
+        $query = "
+       SELECT 'username' FROM users WHERE `username` = '$loginUsername'
+       ";
+        $result = mysqli_query($db, $query)
+        or die('Error: ' . mysqli_error($db) . 'with query ' . $query);
+
+        if (mysqli_num_rows($result) == 1) {
+            $query = "
+        SELECT * FROM `users` WHERE `username` = '$loginUsername'
+        ";
+            $result = mysqli_query($db, $query)
+            or die('Error: ' . mysqli_error($db) . 'with query ' . $query);
+            while ($row = mysqli_fetch_assoc($result)) {
+                $users = $row;
+            }
+
+        } else {
+            $errors['loginFailed'] = 'Login failed';
+        }
+        if (empty($errors)) {
+            if (password_verify($loginPassword, $users['password']) == true) {
+                $_SESSION['login'] = true;
+                header('location: index.html');
+            }
+        }
+    }
 }
 if (isset($_POST['submit-register'])) {
-
-
     $username = mysqli_escape_string($db, $_POST['username']);
     $password = mysqli_escape_string($db, $_POST['password']);
     $dubblePassword = mysqli_escape_string($db, $_POST['passwordCheck']);
@@ -27,7 +61,6 @@ if (isset($_POST['submit-register'])) {
     }
     if ($password !== $dubblePassword) {
         $errors['claimedPassword'] = 'Uw wachtwoord komt niet overeen';
-
     }
 
     $sql = " SELECT `username`  FROM users WHERE `username` = '$username'";
@@ -104,7 +137,6 @@ mysqli_close($db);
 
     <div class="hidden" id="log-in">
         <form action="" method="post">
-
 
             <label for="loginUsername">Gebruikersnaam</label>
             <input id="loginUsername" type="text" name="loginUsername">
