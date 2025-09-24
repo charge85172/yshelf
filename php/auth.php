@@ -42,6 +42,7 @@ if (isset($_POST['submit-login'])) {
         if (empty($errors)) {
             if (password_verify($loginPassword, $users['password']) == true) {
                 $_SESSION['login'] = true;
+                $_SESSION['username'] = $loginUsername;
                 header('location: index.html');
             } else {
                 $loginErrors['loginPasswordError'] = 'uw wachtwoord is incorrect';
