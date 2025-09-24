@@ -4,18 +4,22 @@
 require_once '../includes/database.php';
 session_start();
 
+$_SESSION['login'] = false;
+
 if (isset($_POST['submit-login'])) {
 
     $loginUsername = mysqli_escape_string($db, $_POST['loginUsername']);
     $loginPassword = mysqli_escape_string($db, $_POST['loginPassword']);
 
-    if ($loginUsername == '') {
-        $errors['email'] = 'Uw email is verplicht';
+    $loginErrors = [];
+
+    if ($loginUsername === "") {
+        $loginErrors['loginUsernameError'] = 'Uw email is verplicht';
     }
-    if ($loginPassword == '') {
-        $errors['password'] = 'uw wachtwoord is verplicht';
+    if ($loginPassword === "") {
+        $loginErrors['loginPasswordError'] = 'uw wachtwoord is verplicht';
     }
-    if (empty($errors)) {
+    if (empty($loginErrors)) {
         $query = "
        SELECT 'username' FROM users WHERE `username` = '$loginUsername'
        ";
@@ -33,16 +37,19 @@ if (isset($_POST['submit-login'])) {
             }
 
         } else {
-            $errors['loginFailed'] = 'Login failed';
+            $loginErrors['loginFailed'] = 'Login failed';
         }
         if (empty($errors)) {
             if (password_verify($loginPassword, $users['password']) == true) {
                 $_SESSION['login'] = true;
                 header('location: index.html');
+            } else {
+                $loginErrors['loginPasswordError'] = 'uw wachtwoord is incorrect';
             }
         }
     }
 }
+
 if (isset($_POST['submit-register'])) {
     $username = mysqli_escape_string($db, $_POST['username']);
     $password = mysqli_escape_string($db, $_POST['password']);
@@ -140,10 +147,12 @@ mysqli_close($db);
 
             <label for="loginUsername">Gebruikersnaam</label>
             <input id="loginUsername" type="text" name="loginUsername">
+            <p> <?= $loginErrors['loginUsernameError'] ?? '' ?> </p>
 
             <label for="loginPassword">Wachtwoord</label>
             <input id="loginPassword" type="password" name="loginPassword">
-
+            <p>  <?= $loginErrors['loginPasswordError'] ?? '' ?> </p>
+            <p>  <?= $loginErrors['loginFailed'] ?? '' ?> </p>
             <button name="submit-login" type="submit">Inloggen</button>
         </form>
     </div>
