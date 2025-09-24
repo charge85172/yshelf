@@ -1,9 +1,9 @@
 <?php
 
 /** @var mysqli $db */
-require_once 'include/database.php';
+require_once 'database.php';
 session_start();
 session_destroy();
-header('location: login.php');
+header('location: .auth.php');
 exit;
 
