@@ -4,6 +4,6 @@
 require_once 'database.php';
 session_start();
 session_destroy();
-header('location: .auth.php');
+header('location: ./php/auth.php');
 exit;
 
