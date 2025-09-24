@@ -1,11 +1,9 @@
 function showTab(tabName) {
-    // Hide all booklist sections
     var allTabs = document.querySelectorAll('.booklist-container > div');
     for (var i = 0; i < allTabs.length; i++) {
         allTabs[i].style.display = 'none';
     }
 
-    // Show the selected tab
     var selectedTab = document.getElementById(tabName);
     if (selectedTab) {
         selectedTab.style.display = 'block';
@@ -16,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var navButtons = document.querySelectorAll('.booklist-nav button');
     for (var i = 0; i < navButtons.length; i++) {
         navButtons[i].addEventListener('click', function () {
-            // Remove active class from all buttons
             for (var j = 0; j < navButtons.length; j++) {
                 navButtons[j].classList.remove('active');
             }
@@ -42,41 +39,32 @@ document.addEventListener('DOMContentLoaded', function () {
     navButtons[0].classList.add('active');
 });
 
-// Search functionality for booklist with live results
-var searchTimeout; // Variable to store the timeout
+var searchTimeout;
 
-// This function handles the search input while typing
 function handleBooklistSearchInput() {
-    // Clear any existing timeout
     clearTimeout(searchTimeout);
 
-    // Get the search term
     var searchTerm = document.getElementById('bookListSearchInput').value;
 
-    // If there's text, search after a short delay
     if (searchTerm.length > 2) {
         searchTimeout = setTimeout(function () {
             searchBooksAPI(searchTerm);
-        }, 300); // Wait 300ms after user stops typing
+        }, 300);
     } else {
-        // Hide results if search term is too short
         hideSearchResults();
     }
 }
 
-// This function shows the search results container
 function showSearchResults() {
     var resultsContainer = document.querySelector('.booklist-search-results');
     resultsContainer.classList.add('show');
 }
 
-// This function hides the search results container
 function hideSearchResults() {
     var resultsContainer = document.querySelector('.booklist-search-results');
     resultsContainer.classList.remove('show');
 }
 
-// This function calls the Google Books API
 function searchBooksAPI(query) {
     var apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=20';
 
@@ -89,7 +77,7 @@ function searchBooksAPI(query) {
         })
         .then(function (data) {
             showBooklistResults(data);
-            showSearchResults(); // Show the results container
+            showSearchResults();
         })
         .catch(function (error) {
             console.error('Error:', error);
@@ -98,33 +86,26 @@ function searchBooksAPI(query) {
         });
 }
 
-// This function displays the search results
 function showBooklistResults(data) {
     var resultsDiv = document.getElementById('booklistResults');
-    resultsDiv.innerHTML = ''; // Clear previous results
+    resultsDiv.innerHTML = '';
 
-    // Check if we found any books
     if (data && data.items && data.items.length > 0) {
-        // Loop through each book result
         data.items.forEach(function (book) {
-            // Get book information
             var title = book.volumeInfo.title || 'Geen titel';
             var authors = book.volumeInfo.authors;
             var imageLinks = book.volumeInfo.imageLinks;
             var bookId = book.id;
 
-            // Create a div for this book
             var bookDiv = document.createElement('div');
             bookDiv.className = 'booklist-search-item';
             bookDiv.dataset.id = bookId;
 
-            // Add book title
             var titleElement = document.createElement('h3');
             titleElement.textContent = title;
             titleElement.className = 'booklist-search-title';
             bookDiv.appendChild(titleElement);
 
-            // Add authors if available
             if (authors) {
                 var authorsElement = document.createElement('p');
                 authorsElement.textContent = 'Auteur(s): ' + authors.join(', ');
@@ -132,7 +113,6 @@ function showBooklistResults(data) {
                 bookDiv.appendChild(authorsElement);
             }
 
-            // Add book cover if available
             if (imageLinks && imageLinks.thumbnail) {
                 var img = document.createElement('img');
                 img.src = imageLinks.thumbnail;
@@ -141,22 +121,18 @@ function showBooklistResults(data) {
                 bookDiv.appendChild(img);
             }
 
-            // Add click event to show book details
             bookDiv.addEventListener('click', function () {
                 showBooklistBookDetails(book);
-                hideSearchResults(); // Hide results after clicking
+                hideSearchResults();
             });
 
-            // Add the book to results
             resultsDiv.appendChild(bookDiv);
         });
     } else {
-        // No results found
         resultsDiv.innerHTML = 'Geen resultaten gevonden.';
     }
 }
 
-// This function shows book details in a modal
 function showBooklistBookDetails(book) {
     var title = book.volumeInfo.title || 'Geen titel';
     var authors = book.volumeInfo.authors;
@@ -169,58 +145,121 @@ function showBooklistBookDetails(book) {
     var bookLink = book.selfLink;
     console.log(bookLink);
 
-
     var modal = document.getElementById('myModal');
     var modalContent = document.getElementById('modalContent');
 
-    // Create the modal content HTML
-    modalContent.innerHTML =
-        '<span class="close">&times;</span>' +
-        '<h2>' + title + '</h2>' +
-        (authors ? '<p class="detailsAuthor"><strong>Auteur(s):</strong> ' + authors.join(', ') + '</p>' : '') +
-        '<div class="detailsContainer">' +
-        (imageLinks && imageLinks.thumbnail ? '<img class="detailsImg" src="' + imageLinks.thumbnail + '" alt="' + title + '">' : '') +
-        '<div class="detailsDescription"><strong class="detailsDescriptionTitle">Samenvatting:</strong>' +
-        (description || 'Geen beschrijving beschikbaar.') +
-        '</div></div>' +
-        '<p><strong>Genre(s):</strong> ' + (categories ? categories.join(', ') : 'Niet beschikbaar') + '</p>' +
-        '<p><strong>Pagina\'s:</strong> ' + (pageCount || 'Informatie niet beschikbaar') + '</p>' +
-        '<p><strong>Taal:</strong> ' + (language || 'Niet beschikbaar') + '</p>' +
-        '<p><strong>Release datum:</strong> ' + (publishedDate || 'Niet beschikbaar') + '</p>' +
-        '<button id="addToShelfBtn" class="detailPageButton">+ Voeg toe aan leeslijst</button>';
+    checkBookInCollection(bookLink, function (bookData) {
+        var isInCollection = bookData.exists;
+        var currentStatus = bookData.status;
 
-    // Show the modal
-    modal.style.display = 'block';
+        var buttonHTML = '';
+        if (isInCollection) {
+            buttonHTML = '<div class="book-status-buttons">';
 
-    // Close button functionality
-    modalContent.querySelector('.close').onclick = function () {
-        modal.style.display = 'none';
-    };
+            if (currentStatus !== 'unread') {
+                buttonHTML += '<button id="markAsUnreadBtn" class="detailPageButton">📚 Te lezen</button>';
+            }
+            if (currentStatus !== 'read') {
+                buttonHTML += '<button id="markAsReadBtn" class="detailPageButton">✓ Gelezen</button>';
+            }
+            if (currentStatus !== 'reading') {
+                buttonHTML += '<button id="markAsReadingBtn" class="detailPageButton">📖 Bezig</button>';
+            }
+            if (currentStatus !== 'discarded') {
+                buttonHTML += '<button id="markAsDiscardedBtn" class="detailPageButton">❌ Gestopt</button>';
+            }
+            if (currentStatus !== 'favorite') {
+                buttonHTML += '<button id="markAsFavoriteBtn" class="detailPageButton">⭐ Favoriet</button>';
+            }
 
-    // Close modal when clicking outside
-    window.onclick = function (event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
+            buttonHTML += '<button id="removeFromCollectionBtn" class="detailPageButton remove-btn">🗑️ Verwijder uit collectie</button>';
+            buttonHTML += '</div>';
+        } else {
+            buttonHTML = '<button id="addToShelfBtn" class="detailPageButton">+ Voeg toe aan leeslijst</button>';
         }
-    };
 
-    // Add to shelf button functionality (placeholder for now)
-    modalContent.querySelector('#addToShelfBtn').addEventListener('click', function () {
-        addBookToCollection(book);
+        modalContent.innerHTML =
+            '<span class="close">&times;</span>' +
+            '<h2>' + title + '</h2>' +
+            (authors ? '<p class="detailsAuthor"><strong>Auteur(s):</strong> ' + authors.join(', ') + '</p>' : '') +
+            '<div class="detailsContainer">' +
+            (imageLinks && imageLinks.thumbnail ? '<img class="detailsImg" src="' + imageLinks.thumbnail + '" alt="' + title + '">' : '') +
+            '<div class="detailsDescription"><strong class="detailsDescriptionTitle">Samenvatting:</strong>' +
+            (description || 'Geen beschrijving beschikbaar.') +
+            '</div></div>' +
+            '<p><strong>Genre(s):</strong> ' + (categories ? categories.join(', ') : 'Niet beschikbaar') + '</p>' +
+            '<p><strong>Pagina\'s:</strong> ' + (pageCount || 'Informatie niet beschikbaar') + '</p>' +
+            '<p><strong>Taal:</strong> ' + (language || 'Niet beschikbaar') + '</p>' +
+            '<p><strong>Release datum:</strong> ' + (publishedDate || 'Niet beschikbaar') + '</p>' +
+            buttonHTML;
+
+        modal.style.display = 'block';
+
+        modalContent.querySelector('.close').onclick = function () {
+            modal.style.display = 'none';
+        };
+
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+
+        if (isInCollection) {
+            var unreadBtn = modalContent.querySelector('#markAsUnreadBtn');
+            if (unreadBtn) {
+                unreadBtn.addEventListener('click', function () {
+                    changeBookStatus(book, 'unread');
+                });
+            }
+
+            var readBtn = modalContent.querySelector('#markAsReadBtn');
+            if (readBtn) {
+                readBtn.addEventListener('click', function () {
+                    changeBookStatus(book, 'read');
+                });
+            }
+
+            var readingBtn = modalContent.querySelector('#markAsReadingBtn');
+            if (readingBtn) {
+                readingBtn.addEventListener('click', function () {
+                    changeBookStatus(book, 'reading');
+                });
+            }
+
+            var discardedBtn = modalContent.querySelector('#markAsDiscardedBtn');
+            if (discardedBtn) {
+                discardedBtn.addEventListener('click', function () {
+                    changeBookStatus(book, 'discarded');
+                });
+            }
+
+            var favoriteBtn = modalContent.querySelector('#markAsFavoriteBtn');
+            if (favoriteBtn) {
+                favoriteBtn.addEventListener('click', function () {
+                    changeBookStatus(book, 'favorite');
+                });
+            }
+
+            modalContent.querySelector('#removeFromCollectionBtn').addEventListener('click', function () {
+                removeBookFromCollection(book);
+            });
+        } else {
+            modalContent.querySelector('#addToShelfBtn').addEventListener('click', function () {
+                addBookToCollection(book);
+            });
+        }
     });
 }
 
-// Function to add book to user's collection
 function addBookToCollection(book) {
-    // Prepare book data
     var bookData = {
         action: 'addBook',
         apiLink: book.selfLink || ''
     };
 
-    console.log('Sending data:', bookData); // Debug log
+    console.log('Sending data:', bookData);
 
-    // Send data to PHP
     fetch('booklist.php', {
         method: 'POST',
         headers: {
@@ -229,43 +268,93 @@ function addBookToCollection(book) {
         body: new URLSearchParams(bookData)
     })
         .then(function (response) {
-            console.log('Response status:', response.status); // Debug log
-            console.log('Response headers:', response.headers); // Debug log
-            return response.text(); // Change from .json() to .text() first
+            return response.text();
         })
         .then(function (text) {
-            console.log('Raw response:', text); // Debug log
             try {
                 var data = JSON.parse(text);
                 if (data.success) {
-                    console.log('Boek toegevoegd aan je collectie!');
+
+
+                    refreshBookList();
+
                 } else {
-                    console.log('Fout: ' + data.message);
+                    alert('Fout: ' + data.message);
                 }
             } catch (e) {
                 console.error('JSON parse error:', e);
-                console.log('Server response error: ' + text);
+                alert('Server response error: ' + text);
             }
             document.getElementById('myModal').style.display = 'none';
         })
         .catch(function (error) {
             console.error('Error:', error);
-            console.log('Er is een fout opgetreden bij het toevoegen van het boek.');
+            alert('Er is een fout opgetreden bij het toevoegen van het boek.');
         });
 }
 
-// Set up event listeners when page loads
+function checkBookInCollection(apiLink, callback) {
+    fetch('booklist.php?action=checkBook&apiLink=' + encodeURIComponent(apiLink))
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            callback(data);
+        })
+        .catch(function (error) {
+            console.error('Error checking book:', error);
+            callback({ exists: false, status: null });
+        });
+}
+
+function removeBookFromCollection(book) {
+    var bookData = {
+        action: 'removeBook',
+        apiLink: book.selfLink || ''
+    };
+
+    console.log('Removing book:', bookData);
+
+    fetch('booklist.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(bookData)
+    })
+        .then(function (response) {
+            return response.text();
+        })
+        .then(function (text) {
+            try {
+                var data = JSON.parse(text);
+                if (data.success) {
+
+                    refreshBookList();
+
+                } else {
+                    alert('Fout: ' + data.message);
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                alert('Server response error: ' + text);
+            }
+            document.getElementById('myModal').style.display = 'none';
+        })
+        .catch(function (error) {
+            console.error('Error:', error);
+            alert('Er is een fout opgetreden bij het verwijderen van het boek.');
+        });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-    // Get the search input and button
     var searchInput = document.getElementById('bookListSearchInput');
     var searchButton = document.getElementById('bookListSearchButton');
 
-    // Add event listener for typing in search input
     if (searchInput) {
         searchInput.addEventListener('input', handleBooklistSearchInput);
     }
 
-    // Add event listener for search button click
     if (searchButton) {
         searchButton.addEventListener('click', function () {
             var searchTerm = searchInput.value;
@@ -276,7 +365,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Hide results when clicking outside
     document.addEventListener('click', function (event) {
         var searchContainer = document.querySelector('.book-search');
         if (!searchContainer.contains(event.target)) {
@@ -285,25 +373,19 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Function to fetch book details from API and display them
 function displayUserBooks(userBooks) {
-    // Clear all existing book containers
     document.querySelectorAll('.booklist-unread-container, .booklist-reading-container, .booklist-read-container, .booklist-stopped-container, .booklist-favorites-container').forEach(container => {
         container.innerHTML = '';
     });
 
-    // Process each book
     userBooks.forEach(function (bookData) {
-        // Fetch book details from Google Books API
         fetch(bookData.book_link)
             .then(function (response) {
                 return response.json();
             })
             .then(function (book) {
-                // Create book element
                 var bookElement = createBookElement(book);
 
-                // Add to appropriate tab based on status
                 if (bookData.is_unread == 1) {
                     document.querySelector('.booklist-unread-container').appendChild(bookElement);
                 } else if (bookData.is_reading == 1) {
@@ -322,7 +404,6 @@ function displayUserBooks(userBooks) {
     });
 }
 
-// Function to create a book element
 function createBookElement(book) {
     var bookDiv = document.createElement('div');
     bookDiv.className = 'user-book-item';
@@ -331,7 +412,6 @@ function createBookElement(book) {
     var authors = book.volumeInfo.authors;
     var imageLinks = book.volumeInfo.imageLinks;
 
-    // Create book HTML
     var bookHTML = '<div class="book-cover">';
 
     if (imageLinks && imageLinks.thumbnail) {
@@ -348,10 +428,75 @@ function createBookElement(book) {
 
     bookDiv.innerHTML = bookHTML;
 
-    // Add click event to show details
     bookDiv.addEventListener('click', function () {
         showBooklistBookDetails(book);
     });
 
     return bookDiv;
+}
+
+function changeBookStatus(book, status) {
+    var bookData = {
+        action: 'changeStatus',
+        apiLink: book.selfLink || '',
+        status: status
+    };
+
+    console.log('Changing book status:', bookData);
+
+    fetch('booklist.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(bookData)
+    })
+        .then(function (response) {
+            return response.text();
+        })
+        .then(function (text) {
+            try {
+                var data = JSON.parse(text);
+                if (data.success) {
+                    var statusMessages = {
+                        'unread': 'Boek gemarkeerd als te lezen!',
+                        'read': 'Boek gemarkeerd als gelezen!',
+                        'reading': 'Boek gemarkeerd als bezig!',
+                        'discarded': 'Boek gemarkeerd als gestopt!',
+                        'favorite': 'Boek toegevoegd aan favorieten!'
+                    };
+                    console.log(statusMessages[status] || 'Status bijgewerkt!');
+
+                    refreshBookList();
+
+                } else {
+                    alert('Fout: ' + data.message);
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                alert('Server response error: ' + text);
+            }
+            document.getElementById('myModal').style.display = 'none';
+        })
+        .catch(function (error) {
+            console.error('Error:', error);
+            alert('Er is een fout opgetreden bij het bijwerken van de status.');
+        });
+}
+
+function refreshBookList() {
+    fetch('booklist.php?action=getBooks')
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (userBooks) {
+            document.querySelectorAll('.booklist-unread-container, .booklist-reading-container, .booklist-read-container, .booklist-stopped-container, .booklist-favorites-container').forEach(container => {
+                container.innerHTML = '';
+            });
+
+            displayUserBooks(userBooks);
+        })
+        .catch(function (error) {
+            console.error('Error refreshing book list:', error);
+        });
 }
