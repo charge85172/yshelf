@@ -1,4 +1,24 @@
 <?php
+/** @var mysqli $db */
+require_once '../includes/database.php';
+session_start();
+
+if (!isset($_SESSION['username'])) {
+    // Redirect to login page if not logged in
+    header('Location: login.php');
+    exit();
+}
+
+$username = $_SESSION['username'];
+
+$sql = "SELECT id FROM `users` WHERE username = '$username'";
+
+$result_users = mysqli_query($db, $sql)
+or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
+
+$user = mysqli_fetch_assoc($result_users);
+$user_id = $user['id'];
+
 // --- DATA ---
 //php array om database te simuleren, dit kan straks vervangen worden door database logic.
 
@@ -296,7 +316,6 @@ $shelves = [
             </div>
         </div>
         <nav>
-<!--            ik heb ff placeholder hrefs neergezet, verander deze na commit van die pages pls-->
             <a href="boekenkast.php" class="active">
                 <i class="fa-solid fa-book-bookmark"></i>
                 <span>Boekenkast</span>
@@ -305,7 +324,7 @@ $shelves = [
                 <i class="fa-solid fa-list-check"></i>
                 <span>Leeslijsten</span>
             </a>
-            <a href="friends.php">
+            <a href="friends.php?id=<?= $user_id ?>">
                 <i class="fa-solid fa-users"></i>
                 <span>Vrienden</span>
             </a>

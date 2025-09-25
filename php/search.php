@@ -1,26 +1,26 @@
-<!--code voor friends page, index moet dan wel php zijn-->
+<?php
 
-<!--<?php-->
+/** @var mysqli $db */
+require_once 'includes/database.php';
+session_start();
 
-<!--/** @var mysqli $db */-->
-<!--require_once 'includes/database.php';-->
-<!--session_start();-->
+if (!isset($_SESSION['username'])) {
+    // Redirect to login page if not logged in
+    header('Location: login.php');
+    exit();
+}
 
-<!--$username = $_SESSION['username'];-->
+$username = $_SESSION['username'];
 
-<!--$sql = "SELECT id FROM `users` WHERE username = '$username'";-->
+$sql = "SELECT id FROM `users` WHERE username = '$username'";
 
-<!--$result_users = mysqli_query($db, $sql)-->
-<!--or die('Error ' . mysqli_error($db) . ' with query ' . $sql);-->
+$result_users = mysqli_query($db, $sql)
+or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
 
-<!--$user = mysqli_fetch_assoc($result_users);-->
-<!--$user_id = $user['id'];-->
-<!--print_r($user);-->
+$user = mysqli_fetch_assoc($result_users);
+$user_id = $user['id'];
 
-<!--print_r($_SESSION)-->
-
-
-<!--?>-->
+?>
 
 <!DOCTYPE html>
 <html lang="nl">
@@ -28,18 +28,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YShelf - Jouw Digitale Boekenkast</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="./js/AI.js" defer></script>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../js/AI.js" defer></script>
 </head>
 <body>
 <header>
     <h1>📚 YShelf</h1>
     <nav>
-        <a href="/php/boekenkast.php">Mijn Boekenkast</a>
-        <a href="index.html">Zoeken</a>
-        <a href="php/auth.php">Login</a>
-        <!--        ook voor friend page-->
-        <!--        <a href="php/friends.php?id=<?= $user_id ?>">Vrienden</a>-->
+        <a href="boekenkast.php">Mijn Boekenkast</a>
+        <a href="search.php">Zoeken</a>
+        <a href="friends.php?id=<?= $user_id ?>">Vrienden</a>
+        <a href="logout.php">Logout</a>
     </nav>
 </header>
 
@@ -109,9 +108,9 @@
 </footer>
 
 <!-- JavaScript files -->
-<script src="js/Book.js"></script>
-<script src="js/Shelf.js"></script>
-<script src="js/UI.js"></script>
-<script src="js/app.js"></script>
+<script src="../js/Book.js"></script>
+<script src="../js/Shelf.js"></script>
+<script src="../js/UI.js"></script>
+<script src="../js/app.js"></script>
 </body>
 </html>
