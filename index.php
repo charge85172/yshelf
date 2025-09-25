@@ -2,7 +2,7 @@
 //deze code is geschreven door thomas.
 /** @var mysqli $db */
 
-require_once '../includes/database.php';
+require_once 'includes/database.php';
 session_start();
 
 $_SESSION['login'] = false;
@@ -44,7 +44,7 @@ if (isset($_POST['submit-login'])) {
             if (password_verify($loginPassword, $users['password']) == true) {
                 $_SESSION['login'] = true;
                 $_SESSION['username'] = $loginUsername;
-                header('location: index.html');
+                header('location: php/boekenkast.php');
             } else {
                 $loginErrors['loginPasswordError'] = 'uw wachtwoord is incorrect';
             }
@@ -136,7 +136,7 @@ mysqli_close($db);
 //                $_SESSION['login'] = true;
 //                $_SESSION['user_id'] = $user['id'];
 //                $_SESSION['username'] = $user['username'];
-//                header('Location: ../index.html'); // Stuur door naar de hoofdpagina
+//                header('Location: ../search.php'); // Stuur door naar de hoofdpagina
 //                exit;
 //            } else {
 //                $loginErrors['loginFailed'] = 'Gebruikersnaam of wachtwoord is incorrect.';

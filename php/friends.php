@@ -29,9 +29,9 @@ print_r($result_users)
 <header>
     <h1>📚 YShelf</h1>
     <nav>
-        <a href="/index.html">Mijn Boekenkast</a>
+        <a href="/php/search.php">Mijn Boekenkast</a>
         <a href="#">Zoeken</a>
-        <a href="auth.php">Login</a>
+        <a href="../index.php">Login</a>
 
 
     </nav>

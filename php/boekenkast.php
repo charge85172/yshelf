@@ -1,7 +1,6 @@
 <?php
 // --- DATA ---
-// In a real application, this data would come from a database.
-// We use a PHP array here to simulate that.
+//php array om database te simuleren, dit kan straks vervangen worden door database logic.
 
 $shelves = [
     [
@@ -288,7 +287,7 @@ $shelves = [
 
 <div class="page-container">
 
-    <!-- The sidebar is now first, so it will appear on the left -->
+    <!-- sidebar staat als eerst, dus naar rechts.. enige oplossing lol -->
     <aside class="sidebar">
         <div class="menu-header">
             <h2>Menu</h2>
@@ -297,39 +296,44 @@ $shelves = [
             </div>
         </div>
         <nav>
-            <a href="#" class="active">
+<!--            ik heb ff placeholder hrefs neergezet, verander deze na commit van die pages pls-->
+            <a href="boekenkast.php" class="active">
                 <i class="fa-solid fa-book-bookmark"></i>
                 <span>Boekenkast</span>
             </a>
-            <a href="#">
+            <a href="booklist.php">
                 <i class="fa-solid fa-list-check"></i>
                 <span>Leeslijsten</span>
             </a>
-            <a href="#">
+            <a href="friends.php">
                 <i class="fa-solid fa-users"></i>
                 <span>Vrienden</span>
             </a>
-            <a href="#">
+            <a href="profile.php">
                 <i class="fa-solid fa-user"></i>
                 <span>Profiel</span>
             </a>
-            <a href="#" class="log-out">
+            <a href="logout.php" class="log-out">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log uit</span>
             </a>
         </nav>
     </aside>
 
-    <!-- The main content is second, so it will appear on the right -->
+    <!-- main content is 2e, dus de sidebar wordt rechts gedaan ofzo -->
     <main class="main-content">
         <header>
             <h1>Jouw Yshelf</h1>
         </header>
 
-        <div class="search-bar">
-            <input type="text" placeholder="Zoek naar titel, auteur of genre...">
-            <button type="submit"><i class="fa-solid fa-search"></i></button>
-        </div>
+        <!-- search bar is fake, is gewoon een link die doorstuurt naar de zoekpagina -->
+        <a href="search.php" style="text-decoration: none;">
+            <div class="search-bar">
+                <!-- 'pointer-events: none' makes the input non-interactive, so the click goes to the link -->
+                <input type="text" placeholder="Zoek naar titel, auteur of genre..." style="pointer-events: none;">
+                <button type="submit" style="pointer-events: none;"><i class="fa-solid fa-search"></i></button>
+            </div>
+        </a>
 
         <section class="bookshelves">
             <?php foreach ($shelves as $shelf): ?>

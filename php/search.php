@@ -35,8 +35,8 @@
 <header>
     <h1>📚 YShelf</h1>
     <nav>
-        <a href="#">Mijn Boekenkast</a>
-        <a href="#">Zoeken</a>
+        <a href="/php/boekenkast.php">Mijn Boekenkast</a>
+        <a href="index.html">Zoeken</a>
         <a href="php/auth.php">Login</a>
         <!--        ook voor friend page-->
         <!--        <a href="php/friends.php?id=<?= $user_id ?>">Vrienden</a>-->
