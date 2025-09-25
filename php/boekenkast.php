@@ -349,7 +349,7 @@ $shelves = [
         </header>
 
         <!-- search bar is fake, is gewoon een link die doorstuurt naar de zoekpagina -->
-        <a href="booklist.php" style="text-decoration: none;">
+        <a href="search.php" style="text-decoration: none;">
             <div class="search-bar">
                 <!-- 'pointer-events: none' makes the input non-interactive, so the click goes to the link -->
                 <input type="text" placeholder="Zoek naar titel, auteur of genre..." style="pointer-events: none;">
