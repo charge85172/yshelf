@@ -13,7 +13,6 @@ or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
 
 $user = mysqli_fetch_assoc($result_users);
 
-print_r($result_users)
 ?>
 
 <!DOCTYPE html>

@@ -1,7 +1,7 @@
 <?php
 
 /** @var mysqli $db */
-require_once 'includes/database.php';
+require_once './includes/database.php';
 session_start();
 
 if (!isset($_SESSION['username'])) {

@@ -5,7 +5,7 @@ session_start();
 
 if (!isset($_SESSION['username'])) {
     // Redirect to login page if not logged in
-    header('Location: login.php');
+    header('Location: index.php');
     exit();
 }
 
@@ -23,32 +23,32 @@ $user_id = $user['id'];
 //php array om database te simuleren, dit kan straks vervangen worden door database logic.
 
 $shelves = [
-    [
-        'title' => 'Plank 1: Boeken die je aan het lezen bent',
-        'books' => [] // No books on this shelf yet, as in the mockup
-    ],
-    [
-        'title' => 'Plank 2: Boeken die je wil lezen',
-        'books' => [] // No books on this shelf yet
-    ],
-    [
-        'title' => 'Plank 3: Aanbevolen voor jou',
-        'books' => [
-            ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+A'],
-            ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+B'],
+        [
+                'title' => 'Plank 1: Boeken die je aan het lezen bent',
+                'books' => [] // No books on this shelf yet, as in the mockup
+        ],
+        [
+                'title' => 'Plank 2: Boeken die je wil lezen',
+                'books' => [] // No books on this shelf yet
+        ],
+        [
+                'title' => 'Plank 3: Aanbevolen voor jou',
+                'books' => [
+                        ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+A'],
+                        ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+B'],
+                ]
+        ],
+        [
+                'title' => 'Plank 4: Lees opnieuw',
+                'books' => [
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+1'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+2'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+3'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+4'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+5'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+6'],
+                ]
         ]
-    ],
-    [
-        'title' => 'Plank 4: Lees opnieuw',
-        'books' => [
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+1'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+2'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+3'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+4'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+5'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+6'],
-        ]
-    ]
 ];
 ?>
 <!DOCTYPE html>
@@ -174,6 +174,7 @@ $shelves = [
             font-size: 1.5em;
             transition: transform 0.2s;
         }
+
         .shelf-header a:hover {
             transform: translateX(5px);
         }
@@ -207,6 +208,7 @@ $shelves = [
             overflow: hidden;
             transition: transform 0.2s ease-in-out;
         }
+
         .book-cover:hover {
             transform: scale(1.05);
         }
@@ -294,9 +296,10 @@ $shelves = [
             align-items: center;
             font-size: 28px;
             color: var(--text-color);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: background-color 0.2s;
         }
+
         .help-widget:hover .icon {
             background-color: var(--bg-sidebar-active);
         }
@@ -346,7 +349,7 @@ $shelves = [
         </header>
 
         <!-- search bar is fake, is gewoon een link die doorstuurt naar de zoekpagina -->
-        <a href="search.php" style="text-decoration: none;">
+        <a href="booklist.php" style="text-decoration: none;">
             <div class="search-bar">
                 <!-- 'pointer-events: none' makes the input non-interactive, so the click goes to the link -->
                 <input type="text" placeholder="Zoek naar titel, auteur of genre..." style="pointer-events: none;">
