@@ -223,14 +223,51 @@ mysqli_close($db);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YShelf - Jouw Digitale Boekenkast</title>
     <link rel="stylesheet" href="../css/booklist.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="../js/booklist.js"></script>
 </head>
 <body>
-<div class="booklist">
+
+<div class="page-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="menu-header">
+            <h2>Menu</h2>
+            <div class="menu-icon">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </div>
+        <nav>
+            <a href="boekenkast.php">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>Boekenkast</span>
+            </a>
+            <a href="booklist.php" class="active">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Leeslijsten</span>
+            </a>
+            <a href="friends.php?id=<?= $userID ?>">
+                <i class="fa-solid fa-users"></i>
+                <span>Vrienden</span>
+            </a>
+            <a href="profile.php">
+                <i class="fa-solid fa-user"></i>
+                <span>Profiel</span>
+            </a>
+            <a href="../includes/logout.php" class="log-out">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log uit</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="booklist">
+<header>
     <h1>Mijn Boeken</h1>
     <div class="book-search">
         <input type="text" id="bookListSearchInput" placeholder="Zoek een boek">
-        <button id="bookListSearchButton">Zoek</button>
         <div class="booklist-search-results">
             <div id="booklistResults" class="results-container">
             </div>
@@ -245,10 +282,11 @@ mysqli_close($db);
         <button>Favorieten</button>
         <button>Aanbevolen</button>
     </nav>
-    <div class="collection-search">
+    <!-- <div class="collection-search">
         <input type="text" placeholder="Zoek een boek in je collectie">
         <button>Zoek in collectie</button>
-    </div>
+    </div> -->
+    <!-- Misschie later nog toevoegen -->
     <div class="booklist-container">
 
         <div id="booklist-unread" class="booklist-unread">
@@ -304,7 +342,9 @@ mysqli_close($db);
                 </div>
             </div>
         </div>
-    </div>
+        </div>
+        </div>
+    </main>
 </div>
 
 <div id="myModal" class="modal">

@@ -468,16 +468,22 @@ function createBookElement(book) {
 
     var bookHTML = '<div class="book-cover">';
 
+    // Image or placeholder
     if (imageLinks && imageLinks.thumbnail) {
         bookHTML += '<img src="' + imageLinks.thumbnail + '" alt="' + title + '" class="book-thumbnail">';
+    } else {
+        bookHTML += '<div class="book-thumbnail-placeholder">Geen afbeelding</div>';
     }
 
+    // Book info section
+    bookHTML += '<div class="book-info">';
     bookHTML += '<h3 class="book-title">' + title + '</h3>';
 
     if (authors) {
         bookHTML += '<p class="book-authors">' + authors.join(', ') + '</p>';
     }
 
+    bookHTML += '</div>';
     bookHTML += '</div>';
 
     bookDiv.innerHTML = bookHTML;
