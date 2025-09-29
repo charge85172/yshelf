@@ -1,0 +1,282 @@
+/* Algemene Stijlen */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background: #fff;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    color: #5a4a9f; /* Een paarsachtige kleur */
+}
+
+nav a {
+    margin-left: 15px;
+    text-decoration: none;
+    color: #555;
+    font-weight: bold;
+}
+
+main {
+    padding: 2rem;
+}
+
+/* Boekenkast Grid */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.book-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    padding: 10px;
+    transition: transform 0.2s;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+}
+
+.book-card img {
+    max-width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.book-card h3 {
+    font-size: 1rem;
+    margin: 10px 0 5px;
+}
+
+.book-card p {
+    font-size: 0.9rem;
+    color: #777;
+    margin: 0;
+}
+
+/* Formulier */
+#add-book-form {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+#add-book-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-grow: 1;
+}
+
+#add-book-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #5a4a9f;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* AI Chatbot */
+#chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    height: 500px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    transition: 0.3s ease-in;
+    z-index: 9999;
+}
+
+#chat-widget.collapsed {
+    height: 40px;
+    width: 40px;
+}
+
+#chat-header {
+    background: #715C4F;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+#chat-box {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message {
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 75%;
+    word-wrap: break-word;
+}
+
+.user {
+    background-color: #0078d7;
+    color: white;
+    align-self: flex-end;
+}
+
+.bot {
+    background-color: #f1f1f1;
+    color: #333;
+    align-self: flex-start;
+}
+
+
+#chat-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+#chat-input input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    outline: none;
+}
+
+#chat-input button {
+    border: none;
+    background: #715C4F;
+    color: white;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+/* End AI Chatbot */
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+    background: #333;
+    color: #fff;
+}
+
+
+/* De modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Modal content */
+.modal-content {
+    color: #ffffff;
+    background-color: #83604A;
+    margin: 3% auto;
+    padding: 20px;
+    width: 80%;
+    border-radius: 12px;
+}
+
+/* sluit button */
+.close {
+    color: #ffffff;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+h2 {
+    text-align: center;
+    font-size: 40px;
+    margin-top: -10px;
+}
+
+.detailsAuthor {
+    text-align: center;
+    font-size: 30px;
+    margin-top: -40px;
+}
+
+.detailsContainer {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.detailsImg {
+    flex: 1;
+    max-width: 25%;
+    border-radius: 8px;
+}
+
+.detailsDescriptionTitle {
+    font-size: 20px;
+}
+
+.detailsDescription {
+    flex: 1;
+    font-size: 15px;
+    text-align: left;
+    line-height: 1.4;
+}
+
+.detailPageButton {
+    border-radius: 12px;
+    border: 0;
+    padding: 10px;
+    background-color: #5F6F52;
+    color: #ffffff;
+    box-shadow: 1px 1px 5px #3c2f23;
+}
+
+.detailsDeleteImg {
+    width: 10px;
+    height: 10px;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
