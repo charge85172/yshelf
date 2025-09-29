@@ -23,32 +23,32 @@ $user_id = $user['id'];
 //php array om database te simuleren, dit kan straks vervangen worden door database logic.
 
 $shelves = [
-        [
-                'title' => 'Plank 1: Boeken die je aan het lezen bent',
-                'books' => [] // No books on this shelf yet, as in the mockup
-        ],
-        [
-                'title' => 'Plank 2: Boeken die je wil lezen',
-                'books' => [] // No books on this shelf yet
-        ],
-        [
-                'title' => 'Plank 3: Aanbevolen voor jou',
-                'books' => [
-                        ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+A'],
-                        ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+B'],
-                ]
-        ],
-        [
-                'title' => 'Plank 4: Lees opnieuw',
-                'books' => [
-                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+1'],
-                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+2'],
-                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+3'],
-                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+4'],
-                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+5'],
-                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+6'],
-                ]
+    [
+        'title' => 'Plank 1: Boeken die je aan het lezen bent',
+        'books' => [] // No books on this shelf yet, as in the mockup
+    ],
+    [
+        'title' => 'Plank 2: Boeken die je wil lezen',
+        'books' => [] // No books on this shelf yet
+    ],
+    [
+        'title' => 'Plank 3: Aanbevolen voor jou',
+        'books' => [
+            ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+A'],
+            ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+B'],
         ]
+    ],
+    [
+        'title' => 'Plank 4: Lees opnieuw',
+        'books' => [
+            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+1'],
+            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+2'],
+            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+3'],
+            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+4'],
+            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+5'],
+            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+6'],
+        ]
+    ]
 ];
 ?>
 <!DOCTYPE html>
@@ -337,7 +337,7 @@ $shelves = [
                 <i class="fa-solid fa-user"></i>
                 <span>Profiel</span>
             </a>
-            <a href="logout.php" class="log-out">
+            <a href="../includes/logout.php" class="log-out">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 <span>Log uit</span>
             </a>
