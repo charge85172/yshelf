@@ -72,7 +72,9 @@ if ($_GET && isset($_GET['action']) && $_GET['action'] === 'checkBook') {
 
     if ($exists) {
         $bookData = mysqli_fetch_assoc($checkResult);
-        //checkt of boek al gelezen is enz
+        $isRecommended = $bookData['is_recommended'] == 1;
+        
+        //checkt of boek al gelezen is enz (recommended is independent)
         if ($bookData['is_read'] == 1) {
             $status = 'read';
         } else if ($bookData['is_reading'] == 1) {
@@ -81,13 +83,34 @@ if ($_GET && isset($_GET['action']) && $_GET['action'] === 'checkBook') {
             $status = 'discarded';
         } else if ($bookData['is_favorite'] == 1) {
             $status = 'favorite';
+        } else if ($bookData['is_unread'] == 1) {
+            $status = 'unread';
         } else {
             $status = 'unread';
         }
+    } else {
+        $isRecommended = false;
     }
 
     header('Content-Type: application/json');
-    echo json_encode(['exists' => $exists, 'status' => $status]);
+    echo json_encode(['exists' => $exists, 'status' => $status, 'isRecommended' => $isRecommended]);
+    exit;
+}
+
+// Get recommended books count
+if ($_GET && isset($_GET['action']) && $_GET['action'] === 'getRecommendedCount') {
+    $query = "SELECT id FROM `users` WHERE `username` = '" . $_SESSION['username'] . "'";
+    $result = mysqli_query($db, $query);
+    $row = mysqli_fetch_assoc($result);
+    $userID = $row['id'];
+
+    $countQuery = "SELECT COUNT(*) as count FROM `user_books` WHERE `user_id` = '$userID' AND `is_recommended` = 1";
+    $countResult = mysqli_query($db, $countQuery);
+    $countRow = mysqli_fetch_assoc($countResult);
+    $recommendedCount = $countRow['count'];
+
+    header('Content-Type: application/json');
+    echo json_encode(['count' => $recommendedCount, 'max' => 6]);
     exit;
 }
 // veranderd de status van het boek
@@ -99,31 +122,57 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'changeStatus') {
 
     $apiLink = $_POST['apiLink'];
     $status = $_POST['status'];
-    //eerst ff alles op 0
-    $resetQuery = "UPDATE `user_books` SET `is_read` = 0, `is_reading` = 0, `is_discarded` = 0, `is_favorite` = 0, `is_unread` = 0 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
-    mysqli_query($db, $resetQuery);
+    
+    // Special handling for recommended status - it should be independent/additive
+    if ($status === 'recommended') {
+        // Toggle recommended status without affecting other statuses
+        $checkRecommendedQuery = "SELECT is_recommended FROM `user_books` WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+        $checkRecommendedResult = mysqli_query($db, $checkRecommendedQuery);
+        $checkRecommendedRow = mysqli_fetch_assoc($checkRecommendedResult);
+        $isCurrentlyRecommended = $checkRecommendedRow['is_recommended'];
+        
+        // If trying to add recommendation, check if user already has 6 recommended books
+        if (!$isCurrentlyRecommended) {
+            $countRecommendedQuery = "SELECT COUNT(*) as count FROM `user_books` WHERE `user_id` = '$userID' AND `is_recommended` = 1";
+            $countResult = mysqli_query($db, $countRecommendedQuery);
+            $countRow = mysqli_fetch_assoc($countResult);
+            $recommendedCount = $countRow['count'];
+            
+            if ($recommendedCount >= 6) {
+                echo json_encode(['success' => false, 'message' => 'Je kunt maximaal 6 boeken aanbevelen. Verwijder eerst een andere aanbeveling.']);
+                exit;
+            }
+        }
+        
+        $newRecommendedValue = $isCurrentlyRecommended ? 0 : 1;
+        $updateQuery = "UPDATE `user_books` SET `is_recommended` = '$newRecommendedValue' WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+    } else {
+        // For all other statuses, reset the exclusive statuses but keep recommended
+        $resetQuery = "UPDATE `user_books` SET `is_read` = 0, `is_reading` = 0, `is_discarded` = 0, `is_favorite` = 0, `is_unread` = 0 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+        mysqli_query($db, $resetQuery);
 
-    // dan die bende updaten
-    $updateQuery = "";
-    switch ($status) {
-        case 'unread':
-            $updateQuery = "UPDATE `user_books` SET `is_unread` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
-            break;
-        case 'read':
-            $updateQuery = "UPDATE `user_books` SET `is_read` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
-            break;
-        case 'reading':
-            $updateQuery = "UPDATE `user_books` SET `is_reading` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
-            break;
-        case 'discarded':
-            $updateQuery = "UPDATE `user_books` SET `is_discarded` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
-            break;
-        case 'favorite':
-            $updateQuery = "UPDATE `user_books` SET `is_favorite` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
-            break;
-        default:
-            echo json_encode(['success' => false, 'message' => 'Invalid status']);
-            exit;
+        // dan die bende updaten
+        $updateQuery = "";
+        switch ($status) {
+            case 'unread':
+                $updateQuery = "UPDATE `user_books` SET `is_unread` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+                break;
+            case 'read':
+                $updateQuery = "UPDATE `user_books` SET `is_read` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+                break;
+            case 'reading':
+                $updateQuery = "UPDATE `user_books` SET `is_reading` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+                break;
+            case 'discarded':
+                $updateQuery = "UPDATE `user_books` SET `is_discarded` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+                break;
+            case 'favorite':
+                $updateQuery = "UPDATE `user_books` SET `is_favorite` = 1 WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
+                break;
+            default:
+                echo json_encode(['success' => false, 'message' => 'Invalid status']);
+                exit;
+        }
     }
 
     if (mysqli_query($db, $updateQuery)) {
@@ -174,15 +223,51 @@ mysqli_close($db);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YShelf - Jouw Digitale Boekenkast</title>
     <link rel="stylesheet" href="../css/booklist.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="../js/booklist.js"></script>
-    <script src="../js/AI.js"></script>
 </head>
 <body>
-<div class="booklist">
+
+<div class="page-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="menu-header">
+            <h2>Menu</h2>
+            <div class="menu-icon">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+        </div>
+        <nav>
+            <a href="boekenkast.php">
+                <i class="fa-solid fa-book-bookmark"></i>
+                <span>Boekenkast</span>
+            </a>
+            <a href="booklist.php" class="active">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Leeslijsten</span>
+            </a>
+            <a href="friends.php?id=<?= $userID ?>">
+                <i class="fa-solid fa-users"></i>
+                <span>Vrienden</span>
+            </a>
+            <a href="profile.php">
+                <i class="fa-solid fa-user"></i>
+                <span>Profiel</span>
+            </a>
+            <a href="../includes/logout.php" class="log-out">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>Log uit</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="booklist">
+<header>
     <h1>Mijn Boeken</h1>
     <div class="book-search">
         <input type="text" id="bookListSearchInput" placeholder="Zoek een boek">
-        <button id="bookListSearchButton">Zoek</button>
         <div class="booklist-search-results">
             <div id="booklistResults" class="results-container">
             </div>
@@ -195,11 +280,13 @@ mysqli_close($db);
         <button>Gelezen</button>
         <button>Gestopt</button>
         <button>Favorieten</button>
+        <button>Aanbevolen</button>
     </nav>
-    <div class="collection-search">
+    <!-- <div class="collection-search">
         <input type="text" placeholder="Zoek een boek in je collectie">
         <button>Zoek in collectie</button>
-    </div>
+    </div> -->
+    <!-- Misschie later nog toevoegen -->
     <div class="booklist-container">
 
         <div id="booklist-unread" class="booklist-unread">
@@ -246,7 +333,18 @@ mysqli_close($db);
                 </div>
             </div>
         </div>
-    </div>
+
+        <div id="booklist-recommended" class="booklist-recommended">
+            <h2>Aanbevolen</h2>
+            <div class="booklist-recommended-container">
+                <div class="booklist-recommended-item">
+                    <h3>Boek aanbevolen</h3>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </main>
 </div>
 
 <div id="myModal" class="modal">
