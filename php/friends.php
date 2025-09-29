@@ -2,22 +2,51 @@
 
 /** @var mysqli $db */
 require_once '../includes/database.php';
+session_start();
+
+// M
+if (!isset($_SESSION['username'])) {
+    header('Location: index.php');
+    exit();
+}
 
 if (isset($_GET['q'])) {
     $search = $db->real_escape_string($_GET['q']);
     $sql = "SELECT id, username FROM users WHERE username LIKE '%$search%' LIMIT 10";
     $result = mysqli_query($db, $sql);
-
-    $users = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $users[] = $row;
-    }
+    $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
     header('Content-Type: application/json');
     echo json_encode($users);
     exit;
 }
 
+// M
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $user_id = (int)$_SESSION['user_id'];
+    $friend_id = (int)$input['friend_id'] ?? 0;
+
+    if ($friend_id <= 0) {
+        echo json_encode(['success' => false, 'error' => 'Ongeldig friend_id']);
+        exit;
+    }
+
+    $sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES ($user_id, $friend_id, 1)";
+
+    if (mysqli_query($db, $sql)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => mysqli_error($db)]);
+    }
+    mysqli_close($db);
+
+    header('Content-Type: application/json');
+    exit;
+}
+
+// E
 $user_id = $_GET["id"];
 
 $sql = "SELECT * FROM `users` WHERE id = '$user_id'";
@@ -36,8 +65,8 @@ $user = mysqli_fetch_assoc($result_users);
 while ($row = mysqli_fetch_assoc($result_friend)) {
     $friends[] = $row;
 }
-print_r($user);
-print_r($friends);
+//print_r($user);
+//print_r($friends);
 ?>
 
 <!DOCTYPE html>
@@ -72,6 +101,11 @@ print_r($friends);
             <div id="results" class="shelf-rows"></div>
         </div>
     </div>
+
+
+    <button id="addFriendBtn" class="friendPageButton">+ Voeg vriend toe</button>
+    <button id="DeleteFriendBtn" class="friendPageButton">- Verwijder vriend</button>
+
 </main>
 <!-- Chat widget -->
 <div id="chat-widget" class="collapsed">

@@ -13,10 +13,8 @@ searchInput.addEventListener('keyup', function (e) {
 
 function searchUsers() {
     const query = searchInput.value.trim();
-    if (!query) {
-        resultsDiv.innerHTML = '';
-        return;
-    }
+    resultsDiv.innerHTML = '';
+    if (!query) return;
 
     fetch(`/php/friends.php?q=` + encodeURIComponent(query))
         .then(response => response.json())
@@ -31,9 +29,16 @@ function searchUsers() {
                 const div = document.createElement('div');
                 div.className = 'user-result';
                 div.textContent = user.username;
-                div.addEventListener('click', () => {
-                    alert('Je hebt ' + user.username + ' aangeklikt!');
+
+                const addBtn = document.createElement('button');
+                addBtn.textContent = '+ Voeg vriend toe';
+                addBtn.className = 'friendPageButton';
+                addBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addFriend(user.id);
                 });
+
+                div.appendChild(addBtn);
                 resultsDiv.appendChild(div);
             });
         })
@@ -41,4 +46,13 @@ function searchUsers() {
             console.error(err);
             resultsDiv.innerHTML = '<p>Er is iets misgegaan</p>';
         });
+
+    function addFriend(friendId) {
+        fetch('/php/friends.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({friend_id: friendId})
+        }).then(res => res.json()).then(data => {
+        });
+    }
 }
