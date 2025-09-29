@@ -3,6 +3,20 @@
 /** @var mysqli $db */
 require_once '../includes/database.php';
 
+if (isset($_GET['q'])) {
+    $search = $db->real_escape_string($_GET['q']);
+    $sql = "SELECT id, username FROM users WHERE username LIKE '%$search%' LIMIT 10";
+    $result = mysqli_query($db, $sql);
+
+    $users = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $users[] = $row;
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($users);
+    exit;
+}
 
 $user_id = $_GET["id"];
 
@@ -11,8 +25,19 @@ $sql = "SELECT * FROM `users` WHERE id = '$user_id'";
 $result_users = mysqli_query($db, $sql)
 or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
 
-$user = mysqli_fetch_assoc($result_users);
+$sql_friend = "SELECT * FROM `user_to_friend_id`";
 
+$friends = [];
+
+$result_friend = mysqli_query($db, $sql_friend)
+or die('Error ' . mysqli_error($db) . ' with query ' . $sql_friend);
+
+$user = mysqli_fetch_assoc($result_users);
+while ($row = mysqli_fetch_assoc($result_friend)) {
+    $friends[] = $row;
+}
+print_r($user);
+print_r($friends);
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +47,6 @@ $user = mysqli_fetch_assoc($result_users);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YShelf - Jouw Digitale Boekenkast</title>
     <link rel="stylesheet" href="/css/styles.css">
-    <!--    <script src="./js/AI.js" defer></script>-->
 </head>
 <body>
 <header>
@@ -37,29 +61,17 @@ $user = mysqli_fetch_assoc($result_users);
 </header>
 
 <main>
-
-
-    <!--    <div class="bookshelf-search">-->
-    <!--        <div class="searchbar">-->
-    <!--            <input type="text" id="searchInput" placeholder="Zoek een boek">-->
-    <!--            <button id="searchButton" type="button">Zoeken</button>-->
-    <!--            <div class="search-box" style="position: absolute; top: 20px; right: 0;">-->
-    <!--                                <a href="index.php">Terug naar boekenkast</a>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--        <div class="results-container">-->
-    <!--            <div id="results" class="shelf-rows"></div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-
-    <!--    <div id="bookList"></div>-->
-    <!---->
-    <!-- Modal -->
-    <!--    <div id="myModal" class="modal">-->
-    <!--        <div class="modal-content" id="modalContent">-->
-    <!--        </div>-->
-    <!--    </div>-->
-
+    <div class="friend-search">
+        <div class="searchbar">
+            <input type="text" id="searchInput" placeholder="Zoek een vriend">
+            <button id="searchButton" type="button">Zoeken</button>
+            <div class="search-box" style="position: absolute; top: 20px; right: 0;">
+            </div>
+        </div>
+        <div class="results-container">
+            <div id="results" class="shelf-rows"></div>
+        </div>
+    </div>
 </main>
 <!-- Chat widget -->
 <div id="chat-widget" class="collapsed">
@@ -84,7 +96,6 @@ $user = mysqli_fetch_assoc($result_users);
 </footer>
 
 <!-- JavaScript files -->
-
 <script src="/js/Friends.js"></script>
 
 </body>

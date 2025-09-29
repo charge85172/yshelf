@@ -15,7 +15,7 @@ if (isset($_POST['submit-login'])) {
     $loginErrors = [];
 
     if ($loginUsername === "") {
-        $loginErrors['loginUsernameError'] = 'Uw email is verplicht';
+        $loginErrors['loginUsernameError'] = 'Uw gebruikersnaam is verplicht';
     }
     if ($loginPassword === "") {
         $loginErrors['loginPasswordError'] = 'uw wachtwoord is verplicht';
@@ -88,6 +88,18 @@ if (isset($_POST['submit-register'])) {
     ";
         $result = mysqli_query($db, $query)
         or die('Error ' . mysqli_error($db) . 'with query ' . $query);
+
+        //e
+        $user_id = mysqli_insert_id($db);
+
+        $queryFriend = "
+INSERT INTO `user_to_friend_id`(`user_id`, `friend_id`)
+VALUES ($user_id,  $user_id)
+";
+        $resultFriend = mysqli_query($db, $queryFriend)
+        or die('Error ' . mysqli_error($db) . 'with query ' . $queryFriend);
+
+        print_r($resultFriend);
 
         header('location: login.php');
         exit;
