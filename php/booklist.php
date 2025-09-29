@@ -1,6 +1,13 @@
 <?php
+/** @var mysqli $db */
+require_once '../includes/database.php';
 session_start();
-require_once '../includes/profileRetrieve.php';
+
+if (!isset($_SESSION['username'])) {
+    // Redirect to login page if not logged in
+    header('Location: index.php');
+    exit();
+}
 require_once '../includes/database.php';
 
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'addBook') {
