@@ -8,7 +8,7 @@ session_start();
 $_SESSION['login'] = false;
 
 if (isset($_POST['submit-login'])) {
-
+    $user = null;
     $loginUsername = mysqli_escape_string($db, $_POST['loginUsername']);
     $loginPassword = mysqli_escape_string($db, $_POST['loginPassword']);
 
@@ -22,7 +22,7 @@ if (isset($_POST['submit-login'])) {
     }
     if (empty($loginErrors)) {
         $query = "
-       SELECT 'username' FROM users WHERE `username` = '$loginUsername'
+       SELECT `username` FROM users WHERE `username` = '$loginUsername'
        ";
         $result = mysqli_query($db, $query)
         or die('Error: ' . mysqli_error($db) . 'with query ' . $query);
@@ -36,22 +36,24 @@ if (isset($_POST['submit-login'])) {
 
             $user = mysqli_fetch_assoc($result);
 
-//            while ($row = mysqli_fetch_assoc($result)) {
-//                $users = $row;
-//            }
+            while ($row = mysqli_fetch_assoc($result)) {
+                $users = $row;
+            }
 
         } else {
-            $loginErrors['loginFailed'] = 'Login failed';
+            $loginErrors['loginFailed'] = 'inloggen is gefaald';
         }
-        if (empty($errors)) {
-            if ($user && password_verify($loginPassword, $user['password']) == true) {
-                $_SESSION['login'] = true;
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['user_id'] = $user['id'];
+        if ($user) {
+            if (empty($loginErrors)) {
+                if ($user && password_verify($loginPassword, $user['password']) == true) {
+                    $_SESSION['login'] = true;
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['user_id'] = $user['id'];
 
-                header('location: php/boekenkast.php');
-            } else {
-                $loginErrors['loginPasswordError'] = 'uw wachtwoord is incorrect';
+                    header('location: php/boekenkast.php');
+                } else {
+                    $loginErrors['loginPasswordError'] = 'uw wachtwoord is incorrect';
+                }
             }
         }
     }
@@ -93,10 +95,8 @@ if (isset($_POST['submit-register'])) {
     ";
         $result = mysqli_query($db, $query)
         or die('Error ' . mysqli_error($db) . 'with query ' . $query);
-
         //e
         $user_id = mysqli_insert_id($db);
-
         $queryFriend = "
 INSERT INTO `user_to_friend_id`(`user_id`, `friend_id`)
 VALUES ($user_id,  $user_id)
@@ -104,9 +104,13 @@ VALUES ($user_id,  $user_id)
         $resultFriend = mysqli_query($db, $queryFriend)
         or die('Error ' . mysqli_error($db) . 'with query ' . $queryFriend);
 
-        print_r($resultFriend);
+        echo "<script>
+ alert('Registratie gelukt, log in om verder te gaan')
+            setTimeout(() => {
+              window.location.href = 'index.php'
+            }, 300); 
+          </script>";
 
-        header('location: login.php');
         exit;
 
     }

@@ -73,7 +73,7 @@ if ($_GET && isset($_GET['action']) && $_GET['action'] === 'checkBook') {
     if ($exists) {
         $bookData = mysqli_fetch_assoc($checkResult);
         $isRecommended = $bookData['is_recommended'] == 1;
-        
+
         //checkt of boek al gelezen is enz (recommended is independent)
         if ($bookData['is_read'] == 1) {
             $status = 'read';
@@ -122,7 +122,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'changeStatus') {
 
     $apiLink = $_POST['apiLink'];
     $status = $_POST['status'];
-    
+
     // Special handling for recommended status - it should be independent/additive
     if ($status === 'recommended') {
         // Toggle recommended status without affecting other statuses
@@ -130,20 +130,20 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'changeStatus') {
         $checkRecommendedResult = mysqli_query($db, $checkRecommendedQuery);
         $checkRecommendedRow = mysqli_fetch_assoc($checkRecommendedResult);
         $isCurrentlyRecommended = $checkRecommendedRow['is_recommended'];
-        
+
         // If trying to add recommendation, check if user already has 6 recommended books
         if (!$isCurrentlyRecommended) {
             $countRecommendedQuery = "SELECT COUNT(*) as count FROM `user_books` WHERE `user_id` = '$userID' AND `is_recommended` = 1";
             $countResult = mysqli_query($db, $countRecommendedQuery);
             $countRow = mysqli_fetch_assoc($countResult);
             $recommendedCount = $countRow['count'];
-            
+
             if ($recommendedCount >= 6) {
                 echo json_encode(['success' => false, 'message' => 'Je kunt maximaal 6 boeken aanbevelen. Verwijder eerst een andere aanbeveling.']);
                 exit;
             }
         }
-        
+
         $newRecommendedValue = $isCurrentlyRecommended ? 0 : 1;
         $updateQuery = "UPDATE `user_books` SET `is_recommended` = '$newRecommendedValue' WHERE `user_id` = '$userID' AND `book_link` = '$apiLink'";
     } else {
@@ -264,85 +264,85 @@ mysqli_close($db);
     <!-- Main Content -->
     <main class="main-content">
         <div class="booklist">
-<header>
-    <h1>Mijn Boeken</h1>
-    <div class="book-search">
-        <input type="text" id="bookListSearchInput" placeholder="Zoek een boek">
-        <div class="booklist-search-results">
-            <div id="booklistResults" class="results-container">
-            </div>
-        </div>
-    </div>
-
-    <nav class="booklist-nav">
-        <button>Te lezen</button>
-        <button>Bezig</button>
-        <button>Gelezen</button>
-        <button>Gestopt</button>
-        <button>Favorieten</button>
-        <button>Aanbevolen</button>
-    </nav>
-    <!-- <div class="collection-search">
-        <input type="text" placeholder="Zoek een boek in je collectie">
-        <button>Zoek in collectie</button>
-    </div> -->
-    <!-- Misschie later nog toevoegen -->
-    <div class="booklist-container">
-
-        <div id="booklist-unread" class="booklist-unread">
-            <h2>Te lezen</h2>
-            <div class="booklist-unread-container">
-                <div class="booklist-unread-item">
-                    <h3>Boek niet gelezen</h3>
+            <header>
+                <h1>Mijn Boeken</h1>
+                <div class="book-search">
+                    <input type="text" id="bookListSearchInput" placeholder="Zoek een boek">
+                    <div class="booklist-search-results">
+                        <div id="booklistResults" class="results-container">
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div id="booklist-reading" class="booklist-reading">
-            <h2>Bezig</h2>
-            <div class="booklist-reading-container">
-                <div class="booklist-reading-item">
-                    <h3>Boek bezig</h3>
-                </div>
-            </div>
-        </div>
+                <nav class="booklist-nav">
+                    <button>Te lezen</button>
+                    <button>Bezig</button>
+                    <button>Gelezen</button>
+                    <button>Gestopt</button>
+                    <button>Favorieten</button>
+                    <button>Aanbevolen</button>
+                </nav>
+                <!-- <div class="collection-search">
+                    <input type="text" placeholder="Zoek een boek in je collectie">
+                    <button>Zoek in collectie</button>
+                </div> -->
+                <!-- Misschie later nog toevoegen -->
+                <div class="booklist-container">
 
-        <div id="booklist-read" class="booklist-read">
-            <h2>Gelezen</h2>
-            <div class="booklist-read-container">
-                <div class="booklist-read-item">
-                    <h3>Boek gelezen</h3>
-                </div>
-            </div>
-        </div>
+                    <div id="booklist-unread" class="booklist-unread">
+                        <h2>Te lezen</h2>
+                        <div class="booklist-unread-container">
+                            <div class="booklist-unread-item">
+                                <h3>Boek niet gelezen</h3>
+                            </div>
+                        </div>
+                    </div>
 
-        <div id="booklist-stopped" class="booklist-stopped">
-            <h2>Gestopt</h2>
-            <div class="booklist-stopped-container">
-                <div class="booklist-stopped-item">
-                    <h3>Boek gestopt</h3>
-                </div>
-            </div>
-        </div>
+                    <div id="booklist-reading" class="booklist-reading">
+                        <h2>Bezig</h2>
+                        <div class="booklist-reading-container">
+                            <div class="booklist-reading-item">
+                                <h3>Boek bezig</h3>
+                            </div>
+                        </div>
+                    </div>
 
-        <div id="booklist-favorites" class="booklist-favorites">
-            <h2>Favorieten</h2>
-            <div class="booklist-favorites-container">
-                <div class="booklist-favorites-item">
-                    <h3>Boek favoriet</h3>
-                </div>
-            </div>
-        </div>
+                    <div id="booklist-read" class="booklist-read">
+                        <h2>Gelezen</h2>
+                        <div class="booklist-read-container">
+                            <div class="booklist-read-item">
+                                <h3>Boek gelezen</h3>
+                            </div>
+                        </div>
+                    </div>
 
-        <div id="booklist-recommended" class="booklist-recommended">
-            <h2>Aanbevolen</h2>
-            <div class="booklist-recommended-container">
-                <div class="booklist-recommended-item">
-                    <h3>Boek aanbevolen</h3>
+                    <div id="booklist-stopped" class="booklist-stopped">
+                        <h2>Gestopt</h2>
+                        <div class="booklist-stopped-container">
+                            <div class="booklist-stopped-item">
+                                <h3>Boek gestopt</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="booklist-favorites" class="booklist-favorites">
+                        <h2>Favorieten</h2>
+                        <div class="booklist-favorites-container">
+                            <div class="booklist-favorites-item">
+                                <h3>Boek favoriet</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="booklist-recommended" class="booklist-recommended">
+                        <h2>Aanbevolen</h2>
+                        <div class="booklist-recommended-container">
+                            <div class="booklist-recommended-item">
+                                <h3>Boek aanbevolen</h3>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        </div>
         </div>
     </main>
 </div>
