@@ -4,7 +4,7 @@ require_once '../includes/database.php';
 session_start();
 $username = $_SESSION['username'];
 
-$query = "SELECT `username`, `image`, `taste`, `description`, `genres` FROM `users` WHERE username = '$username'";
+$query = "SELECT `username`, `image`, `taste`, `description`, `genres`, `id` FROM `users` WHERE username = '$username'";
 $result = mysqli_query($db, $query)
 or die('Error: ' . mysqli_error($db) . 'with query ' . $query);
 $row = mysqli_fetch_assoc($result);
@@ -14,6 +14,7 @@ $taste = $row['taste'];
 $description = $row['description'];
 $genres = $row['genres'];
 $image = $row['image'];
+$userID = $row['id'];
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -195,7 +196,7 @@ $image = $row['image'];
                 <i class="fa-solid fa-list-check"></i>
                 <span>Leeslijsten</span>
             </a>
-            <a href="friends.php?id=<?= $user_id ?>">
+            <a href="friends.php?id=<?= $userID ?>">
                 <i class="fa-solid fa-users"></i>
                 <span>Vrienden</span>
             </a>
@@ -213,7 +214,7 @@ $image = $row['image'];
         <section id="shelf-section">
             <section class="profile">
                 <div class="cover-background">
-                    <h2><?php echo htmlspecialchars($name); ?></h2>
+                    <h2>Profiel van: <?php echo htmlspecialchars($name); ?></h2>
                 </div>
                 <div class="profile-photo">
                     <img src="<?php echo $row['image']; ?>"
