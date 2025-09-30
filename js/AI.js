@@ -24,8 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
 async function sendMessage() {
     const response = await fetch("./php/chatbot.php", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: "Give me personalized book recommendations"})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "Give me personalized book recommendations" })
     });
 
     const data = await response.json();

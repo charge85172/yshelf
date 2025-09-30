@@ -101,41 +101,41 @@ function showBooklistResults(data) {
             var authors = book.volumeInfo.authors;
             var imageLinks = book.volumeInfo.imageLinks;
             var bookId = book.id;
+            var authorName = authors ? authors[0] : 'Unknown Author';
 
-            var bookDiv = document.createElement('div');
-            bookDiv.className = 'booklist-search-item';
-            bookDiv.dataset.id = bookId;
-
-            var titleElement = document.createElement('h3');
-            titleElement.textContent = title;
-            titleElement.className = 'booklist-search-title';
-            bookDiv.appendChild(titleElement);
-
-            if (authors) {
-                var authorsElement = document.createElement('p');
-                authorsElement.textContent = 'Auteur(s): ' + authors.join(', ');
-                authorsElement.className = 'booklist-search-authors';
-                bookDiv.appendChild(authorsElement);
-            }
-
-            if (imageLinks && imageLinks.thumbnail) {
-                var img = document.createElement('img');
-                img.src = imageLinks.thumbnail;
-                img.alt = title;
-                img.className = 'booklist-search-cover';
-                bookDiv.appendChild(img);
-            }
-
-            bookDiv.addEventListener('click', function () {
-                showBooklistBookDetails(book);
-                hideSearchResults();
-            });
-
+            // Create book card similar to boekenkast.php
+            var bookDiv = createBookCard(title, authorName, imageLinks, book);
             resultsDiv.appendChild(bookDiv);
         });
     } else {
         resultsDiv.innerHTML = 'Geen resultaten gevonden.';
     }
+}
+
+function createBookCard(title, author, imageLinks, bookData) {
+    var bookDiv = document.createElement('div');
+    bookDiv.className = 'booklist-book-card';
+    bookDiv.dataset.id = bookData.id;
+
+    var hasImage = imageLinks && imageLinks.thumbnail;
+    var coverClass = hasImage ? 'booklist-book-cover has-image' : 'booklist-book-cover';
+
+    bookDiv.innerHTML =
+        '<div class="' + coverClass + '">' +
+        (hasImage ? '<img src="' + imageLinks.thumbnail + '" alt="' + title + '">' : '') +
+        '<div class="booklist-book-cover-text">' +
+        '<div class="booklist-book-title">' + title + '</div>' +
+        '<div class="booklist-book-author">by ' + author + '</div>' +
+        '</div>' +
+        '</div>';
+
+    // Add click event
+    bookDiv.addEventListener('click', function () {
+        showBooklistBookDetails(bookData);
+        hideSearchResults();
+    });
+
+    return bookDiv;
 }
 
 function showBooklistBookDetails(book) {
@@ -460,33 +460,25 @@ function displayUserBooks(userBooks) {
 
 function createBookElement(book) {
     var bookDiv = document.createElement('div');
-    bookDiv.className = 'user-book-item';
+    bookDiv.className = 'user-book-card';
 
     var title = book.volumeInfo.title || 'Geen titel';
     var authors = book.volumeInfo.authors;
     var imageLinks = book.volumeInfo.imageLinks;
+    var authorName = authors ? authors[0] : 'Unknown Author';
 
-    var bookHTML = '<div class="book-cover">';
+    // Create book card similar to search results
+    var hasImage = imageLinks && imageLinks.thumbnail;
+    var coverClass = hasImage ? 'user-book-cover has-image' : 'user-book-cover';
 
-    // Image or placeholder
-    if (imageLinks && imageLinks.thumbnail) {
-        bookHTML += '<img src="' + imageLinks.thumbnail + '" alt="' + title + '" class="book-thumbnail">';
-    } else {
-        bookHTML += '<div class="book-thumbnail-placeholder">Geen afbeelding</div>';
-    }
-
-    // Book info section
-    bookHTML += '<div class="book-info">';
-    bookHTML += '<h3 class="book-title">' + title + '</h3>';
-
-    if (authors) {
-        bookHTML += '<p class="book-authors">' + authors.join(', ') + '</p>';
-    }
-
-    bookHTML += '</div>';
-    bookHTML += '</div>';
-
-    bookDiv.innerHTML = bookHTML;
+    bookDiv.innerHTML =
+        '<div class="' + coverClass + '">' +
+        (hasImage ? '<img src="' + imageLinks.thumbnail + '" alt="' + title + '">' : '') +
+        '<div class="user-book-cover-text">' +
+        '<div class="user-book-title">' + title + '</div>' +
+        '<div class="user-book-author">by ' + authorName + '</div>' +
+        '</div>' +
+        '</div>';
 
     bookDiv.addEventListener('click', function () {
         showBooklistBookDetails(book);
