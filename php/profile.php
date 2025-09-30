@@ -61,13 +61,13 @@ $userID = $row['id'];
     /* --- STYLING (CSS) --- */
     :root {
         --bg-main: #EFEBE0;
-        --bg-container: #6B654F; /* Brownish container color */
-        --bg-sidebar: #A29A82; /* Lighter sidebar color */
+        --bg-container: #6B654F;
+        --bg-sidebar: #A29A82;
         --bg-sidebar-active: #8B836B;
         --text-color: #333;
         --text-light: #FFFFFF;
         --search-bg: #D4CCB4;
-        --cover-bg: #B1A990; /* The requested background for covers */
+        --cover-bg: #B1A990;
     }
 
     * {
@@ -87,9 +87,9 @@ $userID = $row['id'];
     .page-container {
         display: flex;
         width: 1200px;
-        max-width: 95%; /* Use percentage for better responsiveness */
-        min-height: 90vh; /* Use min-height instead of fixed height */
-        margin: 5vh auto; /* Center the container with margin */
+        max-width: 95%;
+        min-height: 90vh;
+        margin: 5vh auto;
         background-color: var(--bg-container);
         border-radius: 15px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -100,11 +100,11 @@ $userID = $row['id'];
     /* --- Main Content Area --- */
     .main-content {
         flex-grow: 1;
-        padding: 30px 40px; /* Increased padding for better spacing */
+        padding: 30px 40px;
         display: flex;
         flex-direction: column;
         position: relative;
-        overflow-y: auto; /* Allow this entire section to scroll */
+        overflow-y: auto;
         margin: 10px;
     }
 
@@ -172,7 +172,7 @@ $userID = $row['id'];
     .sidebar nav a i {
         font-size: 22px;
         margin-right: 20px;
-        width: 30px; /* To align text */
+        width: 30px;
         text-align: center;
     }
 
@@ -186,7 +186,7 @@ $userID = $row['id'];
     }
 
     .sidebar .log-out {
-        margin-top: auto; /* Pushes logout to the bottom */
+        margin-top: auto;
     }
 
 </style>
@@ -196,11 +196,6 @@ $userID = $row['id'];
     <aside class="sidebar">
         <div class="menu-header">
             <h2>Menu</h2>
-            <!--
-            <div class="menu-icon">
-                <i class="fa-solid fa-bars"></i>
-            </div>
-            -->
         </div>
         <nav>
             <a href="boekenkast.php">
@@ -264,31 +259,11 @@ $userID = $row['id'];
                             <p>Je hebt nog geen favoriete genres gekozen.</p>
                             <a href="edit_profile.php" class="btn">➕ Kies genres</a>
                         <?php endif; ?>
-
                     </section>
                 </div>
             </section>
-
-
         </section>
     </main>
-    <!-- Chat widget -->
-    <div id="chat-widget" class="collapsed">
-        <div id="chat-header">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-dots"
-                 viewBox="0 0 16 16">
-                <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/>
-                <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9 9 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.4 10.4 0 0 1-.524 2.318l-.003.011a11 11 0 0 1-.244.637c-.079.186.074.394.273.362a22 22 0 0 0 .693-.125m.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8 8 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a11 11 0 0 0 .398-2"/>
-            </svg>
-            <span id="chat-title" style="display:none;">Luna</span>
-            <span id="chat-close" style="">×</span>
-        </div>
-        <div id="chat-box"></div>
-        <div id="chat-input">
-            <input type="text" id="userInput" placeholder="Typ een bericht..."/>
-            <button onclick="sendMessage()">▶</button>
-        </div>
-    </div>
 </div>
 
 
