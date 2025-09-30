@@ -33,17 +33,22 @@ if (isset($_POST['submit-login'])) {
         ";
             $result = mysqli_query($db, $query)
             or die('Error: ' . mysqli_error($db) . 'with query ' . $query);
-            while ($row = mysqli_fetch_assoc($result)) {
-                $users = $row;
-            }
+
+            $user = mysqli_fetch_assoc($result);
+
+//            while ($row = mysqli_fetch_assoc($result)) {
+//                $users = $row;
+//            }
 
         } else {
             $loginErrors['loginFailed'] = 'Login failed';
         }
         if (empty($errors)) {
-            if (password_verify($loginPassword, $users['password']) == true) {
+            if ($user && password_verify($loginPassword, $user['password']) == true) {
                 $_SESSION['login'] = true;
-                $_SESSION['username'] = $loginUsername;
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['user_id'] = $user['id'];
+
                 header('location: php/boekenkast.php');
             } else {
                 $loginErrors['loginPasswordError'] = 'uw wachtwoord is incorrect';

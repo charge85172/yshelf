@@ -10,6 +10,12 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'error' => 'Geen user_id in sessie']);
+    exit;
+}
+
+
 if (isset($_GET['q'])) {
     $search = $db->real_escape_string($_GET['q']);
     $sql = "SELECT id, username FROM users WHERE username LIKE '%$search%' LIMIT 10";
@@ -35,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES ($user_id, $friend_id, 1)";
 
+    header('Content-Type: application/json');
+
     if (mysqli_query($db, $sql)) {
         echo json_encode(['success' => true]);
     } else {
@@ -42,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     mysqli_close($db);
 
-    header('Content-Type: application/json');
+//    header('Content-Type: application/json');
     exit;
 }
 
