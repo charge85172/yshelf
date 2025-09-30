@@ -139,6 +139,9 @@ body {
     font-size: 2rem;
     margin-bottom: 20px;
     font-weight: bold;
+    background-color: #B1A990FF;
+    border-radius: 15px;
+    padding: 20px 0px;
 }
 
 .book-search {
