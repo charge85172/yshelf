@@ -71,6 +71,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_close($db);
     exit;
 }
+
+// Als je de vriendenlijst wilt ophalen (zonder JOIN)
+if (isset($_GET['friends']) && $_GET['friends'] == 1) {
+    $friends = [];
+
+    // Stap 1: haal alle friend_id's op
+    $sql = "SELECT friend_id 
+            FROM friendships 
+            WHERE user_id = $user_id AND status = 1";
+
+    $result = mysqli_query($db, $sql);
+    if (!$result) {
+        die(json_encode(['success' => false, 'error' => mysqli_error($db)]));
+    }
+
+    $friendIds = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $friendIds[] = (int)$row['friend_id'];
+    }
+
+    // Stap 2: haal usernames op uit users-tabel
+    if (!empty($friendIds)) {
+        $idList = implode(',', $friendIds);
+        $sqlUsers = "SELECT id, username FROM users WHERE id IN ($idList)";
+        $resultUsers = mysqli_query($db, $sqlUsers);
+
+        if (!$resultUsers) {
+            die(json_encode(['success' => false, 'error' => mysqli_error($db)]));
+        }
+
+        while ($row = mysqli_fetch_assoc($resultUsers)) {
+            $friends[] = $row;
+        }
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($friends);
+    exit;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -288,6 +328,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: var(--bg-sidebar-active);
         }
 
+        .friend-section {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .friend-search,
+        .friend-list {
+            flex: 1;
+            background: var(--bg-sidebar);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .friend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: #D4CCB4;
+            border: 1px solid #B1A990;
+            border-radius: 8px;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .friend-item:last-child {
+            border-bottom: none;
+        }
+
+        .friend-item:hover {
+            background-color: #C0B58E;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -296,9 +371,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <aside class="sidebar">
         <div class="menu-header">
             <h2>Menu</h2>
-            <div class="menu-icon">
-                <i class="fa-solid fa-bars"></i>
-            </div>
         </div>
         <nav>
             <a href="boekenkast.php">
@@ -328,15 +400,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <header>
             <h1>Jouw Yshelf</h1>
         </header>
-        <div class="friend-search">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Zoek een vriend">
-                <button id="searchButton" type="button">Zoeken</button>
-                <div class="search-box" style="position: absolute; top: 20px; right: 0;">
+        <div class="friend-section">
+            <div class="friend-search">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Zoek een vriend">
+                    <button id="searchButton" type="button">Zoeken</button>
+                    <div class="search-box" style="position: absolute; top: 20px; right: 0;">
+                    </div>
+                </div>
+                <div class="results-container" id="friend-item">
+                    <div id="results" class="shelf-rows"></div>
                 </div>
             </div>
-            <div class="results-container">
-                <div id="results" class="shelf-rows"></div>
+            <div class="friend-list">
+                <h2>Jouw vrienden</h2>
+                
+                <div class="results-container" id="friendList">
+                    <div id="results" class="shelf-rows"></div>
+                </div>
             </div>
         </div>
         <div id="chat-widget" class="collapsed">
