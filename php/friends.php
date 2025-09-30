@@ -1,80 +1,152 @@
 <?php
+//
+///** @var mysqli $db */
+//require_once '../includes/database.php';
+//session_start();
+//
+//// M
+//if (!isset($_SESSION['username'])) {
+//    header('Location: index.php');
+//    exit();
+//}
+//
+//if (!isset($_SESSION['user_id'])) {
+//    echo json_encode(['success' => false, 'error' => 'Geen user_id in sessie']);
+//    exit;
+//}
+//
+//
+//if (isset($_GET['q'])) {
+//    $search = $db->real_escape_string($_GET['q']);
+//    $sql = "SELECT id, username FROM users WHERE username LIKE '%$search%' LIMIT 10";
+//    $result = mysqli_query($db, $sql);
+//    $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+//
+//    header('Content-Type: application/json');
+//    echo json_encode($users);
+//    exit;
+//}
+//
+//// M
+//if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+//    $input = json_decode(file_get_contents('php://input'), true);
+//
+//    $user_id = (int)$_SESSION['user_id'];
+//    $friend_id = (int)$input['friend_id'] ?? 0;
+//
+//    if ($friend_id <= 0) {
+//        echo json_encode(['success' => false, 'error' => 'Ongeldig friend_id']);
+//        exit;
+//    }
+//
+//    $sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES ($user_id, $friend_id, 1)";
+//
+//    header('Content-Type: application/json');
+//
+//    if (mysqli_query($db, $sql)) {
+//        echo json_encode(['success' => true]);
+//    } else {
+//        echo json_encode(['success' => false, 'error' => mysqli_error($db)]);
+//    }
+//    mysqli_close($db);
+//    exit;
+//}
+//
+//// E
+//$user_id = $_GET["id"];
+//
+//$sql = "SELECT * FROM `users` WHERE id = '$user_id'";
+//
+//$result_users = mysqli_query($db, $sql)
+//or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
+//
+//$sql_friend = "SELECT * FROM `user_to_friend_id`";
+//
+//$friends = [];
+//
+//$result_friend = mysqli_query($db, $sql_friend)
+//or die('Error ' . mysqli_error($db) . ' with query ' . $sql_friend);
+//
+//$user = mysqli_fetch_assoc($result_users);
+//while ($row = mysqli_fetch_assoc($result_friend)) {
+//    $friends[] = $row;
+//}
+////print_r($user);
+////print_r($friends);
+//?>
 
+
+<?php
 /** @var mysqli $db */
 require_once '../includes/database.php';
 session_start();
 
 // M
-if (!isset($_SESSION['username'])) {
-    header('Location: index.php');
-    exit();
-}
-
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'error' => 'Geen user_id in sessie']);
+    echo json_encode(['success' => false, 'error' => 'Niet ingelogd']);
     exit;
 }
 
+$user_id = (int)$_SESSION['user_id'];
 
 if (isset($_GET['q'])) {
     $search = $db->real_escape_string($_GET['q']);
-    $sql = "SELECT id, username FROM users WHERE username LIKE '%$search%' LIMIT 10";
+    $sql = "
+        SELECT u.id, u.username,
+               IFNULL(
+                   (SELECT status 
+                    FROM friendships f 
+                    WHERE f.user_id = $user_id AND f.friend_id = u.id
+                    LIMIT 1),
+               0) AS friendStatus
+        FROM users u
+        WHERE u.username LIKE '%$search%'
+          AND u.id != $user_id
+        LIMIT 10
+    ";
+
     $result = mysqli_query($db, $sql);
-    $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    if (!$result) die(json_encode(['success' => false, 'error' => mysqli_error($db)]));
+
+    $users = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $row['friendStatus'] = $row['friendStatus'] ? 1 : 0;
+        $users[] = $row;
+    }
 
     header('Content-Type: application/json');
     echo json_encode($users);
     exit;
 }
-
-// M
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $user_id = (int)$_SESSION['user_id'];
-    $friend_id = (int)$input['friend_id'] ?? 0;
+    $friend_id = (int)($input['friend_id'] ?? 0);
+    $action = $input['action'] ?? '';
 
-    if ($friend_id <= 0) {
-        echo json_encode(['success' => false, 'error' => 'Ongeldig friend_id']);
+    if ($friend_id <= 0 || !in_array($action, ['add', 'delete'])) {
+        echo json_encode(['success' => false, 'error' => 'Ongeldige parameters']);
         exit;
     }
 
-    $sql = "INSERT INTO friendships (user_id, friend_id, status) VALUES ($user_id, $friend_id, 1)";
+    if ($action === 'add') {
+        $sql = "INSERT INTO friendships (user_id, friend_id, status) 
+                VALUES ($user_id, $friend_id, 1)
+                ON DUPLICATE KEY UPDATE status = 1";
+    } else {
+        $sql = "UPDATE friendships SET status = 0 WHERE user_id = $user_id AND friend_id = $friend_id";
+    }
 
     header('Content-Type: application/json');
-
     if (mysqli_query($db, $sql)) {
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'error' => mysqli_error($db)]);
     }
-    mysqli_close($db);
 
-//    header('Content-Type: application/json');
+    mysqli_close($db);
     exit;
 }
-
-// E
-$user_id = $_GET["id"];
-
-$sql = "SELECT * FROM `users` WHERE id = '$user_id'";
-
-$result_users = mysqli_query($db, $sql)
-or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
-
-$sql_friend = "SELECT * FROM `user_to_friend_id`";
-
-$friends = [];
-
-$result_friend = mysqli_query($db, $sql_friend)
-or die('Error ' . mysqli_error($db) . ' with query ' . $sql_friend);
-
-$user = mysqli_fetch_assoc($result_users);
-while ($row = mysqli_fetch_assoc($result_friend)) {
-    $friends[] = $row;
-}
-//print_r($user);
-//print_r($friends);
 ?>
 
 <!DOCTYPE html>
@@ -109,10 +181,6 @@ while ($row = mysqli_fetch_assoc($result_friend)) {
             <div id="results" class="shelf-rows"></div>
         </div>
     </div>
-
-
-    <button id="addFriendBtn" class="friendPageButton">+ Voeg vriend toe</button>
-    <button id="DeleteFriendBtn" class="friendPageButton">- Verwijder vriend</button>
 
 </main>
 <!-- Chat widget -->
