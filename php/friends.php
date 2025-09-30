@@ -170,11 +170,13 @@ if (isset($_GET['friends']) && $_GET['friends'] == 1) {
         header {
             text-align: center;
             margin-bottom: 30px;
+            background-color: var(--cover-bg);
+            border-radius: 15px;
         }
 
         header h1 {
             font-size: 2.5em;
-            color: var(--text-light);
+            color: var(--text-color);
             font-weight: bold;
         }
 

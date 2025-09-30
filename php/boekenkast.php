@@ -67,13 +67,13 @@ function getBookDetailsFromAPI($bookLink)
     }
 
     return [
-            'title' => $volumeInfo['title'] ?? 'Unknown Title',
-            'author' => $volumeInfo['authors'][0] ?? 'Unknown Author',
-            'genre' => isset($volumeInfo['categories']) ? $volumeInfo['categories'][0] : 'Unknown Genre',
-            'cover_url' => $volumeInfo['imageLinks']['thumbnail'] ?? 'https://placehold.co/150x220/5F6F52/fff?text=No+Cover',
-            'description' => $volumeInfo['description'] ?? '',
-            'preview_link' => $volumeInfo['previewLink'] ?? $bookLink,
-            'link' => $bookLink
+        'title' => $volumeInfo['title'] ?? 'Unknown Title',
+        'author' => $volumeInfo['authors'][0] ?? 'Unknown Author',
+        'genre' => isset($volumeInfo['categories']) ? $volumeInfo['categories'][0] : 'Unknown Genre',
+        'cover_url' => $volumeInfo['imageLinks']['thumbnail'] ?? 'https://placehold.co/150x220/5F6F52/fff?text=No+Cover',
+        'description' => $volumeInfo['description'] ?? '',
+        'preview_link' => $volumeInfo['previewLink'] ?? $bookLink,
+        'link' => $bookLink
     ];
 }
 
@@ -133,20 +133,20 @@ function getAIRecommendations($user_id, $db)
 
     // System prompt with detailed book information
     $systemPrompt = "The user has the following reading preferences: " .
-            "Favorite genres: " . $genres . ". " .
-            "Books read: " . formatBooksForAI($readBooks) . ". " .
-            "Books to read: " . formatBooksForAI($unreadBooks) . ". " .
-            "Books currently reading: " . formatBooksForAI($readingBooks) . ". " .
-            "Favorite books: " . formatBooksForAI($favoriteBooks) . ". " .
-            "Discarded books: " . formatBooksForAI($discardedBooks) . ". " .
-            "Previously recommended books: " . formatBooksForAI($recommendedBooks) . ". " .
-            "Based on this detailed reading history, provide 6 personalized book recommendations. " .
-            "Make sure to only recommend books that are NOT already in the user's library. " .
-            "Consider the genres, authors, and themes from their reading history. " .
-            "Dont give me the same books twice or different editions of the same book, recommend me new books. " .
-            "Provide the book title and author separated by a pipe character (|). " .
-            "Do NOT include numbers, bullets, or any prefixes before the book titles. " .
-            "Format: 
+        "Favorite genres: " . $genres . ". " .
+        "Books read: " . formatBooksForAI($readBooks) . ". " .
+        "Books to read: " . formatBooksForAI($unreadBooks) . ". " .
+        "Books currently reading: " . formatBooksForAI($readingBooks) . ". " .
+        "Favorite books: " . formatBooksForAI($favoriteBooks) . ". " .
+        "Discarded books: " . formatBooksForAI($discardedBooks) . ". " .
+        "Previously recommended books: " . formatBooksForAI($recommendedBooks) . ". " .
+        "Based on this detailed reading history, provide 6 personalized book recommendations. " .
+        "Make sure to only recommend books that are NOT already in the user's library. " .
+        "Consider the genres, authors, and themes from their reading history. " .
+        "Dont give me the same books twice or different editions of the same book, recommend me new books. " .
+        "Provide the book title and author separated by a pipe character (|). " .
+        "Do NOT include numbers, bullets, or any prefixes before the book titles. " .
+        "Format: 
         Book Title|Author Name
         Another Book Title|Another Author Name
         Yet Another Book|Another Author
@@ -165,16 +165,16 @@ function getAIRecommendations($user_id, $db)
     // Call OpenAI API
     $ch = curl_init("https://api.openai.com/v1/chat/completions");
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json",
-            "Authorization: Bearer " . $apiKey
+        "Content-Type: application/json",
+        "Authorization: Bearer " . $apiKey
     ]);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-            "model" => "gpt-4o-mini",
-            "messages" => [
-                    ["role" => "system", "content" => $systemPrompt],
-                    ["role" => "user", "content" => "Can you give me 6 personalized book recommendations based on my reading history?"]
-            ]
+        "model" => "gpt-4o-mini",
+        "messages" => [
+            ["role" => "system", "content" => $systemPrompt],
+            ["role" => "user", "content" => "Can you give me 6 personalized book recommendations based on my reading history?"]
+        ]
     ]));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -223,11 +223,11 @@ function getAIRecommendations($user_id, $db)
     $recommendations = [];
     foreach (array_slice($bookData, 0, 6) as $book) {
         $recommendations[] = [
-                'title' => $book['title'],
-                'author' => $book['author'],
-                'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=' . urlencode(substr($book['title'], 0, 15)),
-                'description' => 'AI Recommended Book',
-                'preview_link' => '#'
+            'title' => $book['title'],
+            'author' => $book['author'],
+            'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=' . urlencode(substr($book['title'], 0, 15)),
+            'description' => 'AI Recommended Book',
+            'preview_link' => '#'
         ];
     }
 
@@ -279,10 +279,10 @@ function getCachedRecommendations($user_id, $db)
 
     // Save new recommendations to cache
     $cacheData = [
-            'timestamp' => time(),
-            'user_id' => $user_id,
-            'recommendations' => $recommendations,
-            'cache_duration' => $cacheTime
+        'timestamp' => time(),
+        'user_id' => $user_id,
+        'recommendations' => $recommendations,
+        'cache_duration' => $cacheTime
     ];
 
     $success = file_put_contents($cacheFile, json_encode($cacheData, JSON_PRETTY_PRINT));
@@ -421,13 +421,13 @@ function getBooksForShelfFast($db, $user_id, $column)
         if (!empty($bookLink)) {
             // Create basic book entry without API call
             $books[] = [
-                    'title' => 'Book from Collection',
-                    'author' => 'Loading details...',
-                    'genre' => 'Unknown',
-                    'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book',
-                    'description' => 'Book details will load in background',
-                    'preview_link' => '#',
-                    'api_link' => $bookLink
+                'title' => 'Book from Collection',
+                'author' => 'Loading details...',
+                'genre' => 'Unknown',
+                'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book',
+                'description' => 'Book details will load in background',
+                'preview_link' => '#',
+                'api_link' => $bookLink
             ];
         }
     }
@@ -458,13 +458,13 @@ function getBooksForShelfWithTimeout($db, $user_id, $column, $startTime, $maxLoa
             } else {
                 // If API call fails, create a basic book entry
                 $books[] = [
-                        'title' => 'Loading...',
-                        'author' => 'Please wait',
-                        'genre' => 'Unknown',
-                        'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Loading',
-                        'description' => 'Book details are loading',
-                        'preview_link' => '#',
-                        'api_link' => $bookLink
+                    'title' => 'Loading...',
+                    'author' => 'Please wait',
+                    'genre' => 'Unknown',
+                    'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Loading',
+                    'description' => 'Book details are loading',
+                    'preview_link' => '#',
+                    'api_link' => $bookLink
                 ];
             }
         }
@@ -476,30 +476,30 @@ function getBooksForShelfWithTimeout($db, $user_id, $column, $startTime, $maxLoa
 //php array om database te simuleren, dit kan straks vervangen worden door database logic.
 
 $shelves = [
-        [
-                'title' => 'Plank 1: Boeken die je aan het lezen bent',
-                'books' => $readingBooks
-        ],
-        [
-                'title' => 'Plank 2: Boeken die je wil lezen',
-                'books' => $unreadBooks
-        ],
-        [
-                'title' => 'Plank 3: Boeken die je hebt gelezen',
-                'books' => $readBooks
-        ],
-        [
-                'title' => 'Plank 4: Boeken die je niet meer wilt lezen',
-                'books' => $discardedBooks
-        ],
-        [
-                'title' => 'Plank 5: Je favoriete boeken',
-                'books' => $favoriteBooks
-        ],
-        [
-                'title' => 'Plank 6: Aanbevolen voor jou (AI)',
-                'books' => $aiRecommendations
-        ]
+    [
+        'title' => 'Plank 1: Boeken die je aan het lezen bent',
+        'books' => $readingBooks
+    ],
+    [
+        'title' => 'Plank 2: Boeken die je wil lezen',
+        'books' => $unreadBooks
+    ],
+    [
+        'title' => 'Plank 3: Boeken die je hebt gelezen',
+        'books' => $readBooks
+    ],
+    [
+        'title' => 'Plank 4: Boeken die je niet meer wilt lezen',
+        'books' => $discardedBooks
+    ],
+    [
+        'title' => 'Plank 5: Je favoriete boeken',
+        'books' => $favoriteBooks
+    ],
+    [
+        'title' => 'Plank 6: Aanbevolen voor jou (AI)',
+        'books' => $aiRecommendations
+    ]
 ];
 ?>
 
@@ -524,8 +524,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
     $freshRecommendations = getCachedRecommendations($user_id, $db);
 
     echo json_encode([
-            'success' => true,
-            'recommendations' => $freshRecommendations
+        'success' => true,
+        'recommendations' => $freshRecommendations
     ]);
     exit;
 }
@@ -591,11 +591,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
         header {
             text-align: center;
             margin-bottom: 30px;
+            background-color: var(--cover-bg);
+            border-radius: 15px;
         }
 
         header h1 {
             font-size: 2.5em;
-            color: var(--text-light);
+            color: var(--text-color);
             font-weight: bold;
         }
 
