@@ -72,11 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Als je de vriendenlijst wilt ophalen (zonder JOIN)
 if (isset($_GET['friends']) && $_GET['friends'] == 1) {
     $friends = [];
 
-    // Stap 1: haal alle friend_id's op
     $sql = "SELECT friend_id 
             FROM friendships 
             WHERE user_id = $user_id AND status = 1";
@@ -91,7 +89,6 @@ if (isset($_GET['friends']) && $_GET['friends'] == 1) {
         $friendIds[] = (int)$row['friend_id'];
     }
 
-    // Stap 2: haal usernames op uit users-tabel
     if (!empty($friendIds)) {
         $idList = implode(',', $friendIds);
         $sqlUsers = "SELECT id, username FROM users WHERE id IN ($idList)";
@@ -414,7 +411,6 @@ if (isset($_GET['friends']) && $_GET['friends'] == 1) {
             </div>
             <div class="friend-list">
                 <h2>Jouw vrienden</h2>
-                
                 <div class="results-container" id="friendList">
                     <div id="results" class="shelf-rows"></div>
                 </div>

@@ -29,6 +29,10 @@ function searchUsers() {
                 div.className = 'friend-item';
                 div.textContent = user.username;
 
+                div.addEventListener('click', () => {
+                    window.location.href = `/php/profile.php?id=${user.id}`;
+                });
+
                 const btn = document.createElement('button');
                 btn.className = 'friendPageButton';
                 updateButton(user, btn);
@@ -49,7 +53,15 @@ function searchUsers() {
 }
 
 function updateButton(user, button) {
-    button.textContent = user.friendStatus === 1 ? '- Verwijder vriend' : '+ Voeg vriend toe';
+    if (user.friendStatus === 1) {
+        button.textContent = '- Verwijder vriend';
+        button.classList.remove('add');
+        button.classList.add('delete');
+    } else {
+        button.textContent = '+ Voeg vriend toe';
+        button.classList.remove('delete');
+        button.classList.add('add');
+    }
 }
 
 function toggleFriend(user, button) {
@@ -65,6 +77,7 @@ function toggleFriend(user, button) {
             if (data.success) {
                 user.friendStatus = user.friendStatus === 1 ? 0 : 1;
                 updateButton(user, button);
+                loadFriends();
             } else {
                 alert('Er is iets misgegaan: ' + (data.error || ''));
             }
@@ -86,7 +99,38 @@ function loadFriends() {
             data.forEach(friend => {
                 const div = document.createElement("div");
                 div.classList.add("friend-item");
-                div.textContent = friend.username;
+
+                const span = document.createElement("span");
+                span.textContent = friend.username;
+
+                div.addEventListener('click', () => {
+                    window.location.href = `/php/profile.php?id=${friend.id}`;
+                });
+
+                const btn = document.createElement("button");
+                btn.className = "friendPageButton";
+                updateButton({friendStatus: 1}, btn);
+                btn.textContent = "- Verwijder vriend";
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    fetch('/php/friends.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({friend_id: friend.id, action: 'delete'})
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                loadFriends();
+                            } else {
+                                alert('Er is iets misgegaan: ' + (data.error || ''));
+                            }
+                        })
+                        .catch(err => console.error(err));
+                });
+
+                div.appendChild(span);
+                div.appendChild(btn);
                 container.appendChild(div);
             });
         })
