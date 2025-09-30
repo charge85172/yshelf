@@ -95,10 +95,8 @@ if (isset($_POST['submit-register'])) {
     ";
         $result = mysqli_query($db, $query)
         or die('Error ' . mysqli_error($db) . 'with query ' . $query);
-
         //e
         $user_id = mysqli_insert_id($db);
-
         $queryFriend = "
 INSERT INTO `user_to_friend_id`(`user_id`, `friend_id`)
 VALUES ($user_id,  $user_id)
@@ -106,9 +104,13 @@ VALUES ($user_id,  $user_id)
         $resultFriend = mysqli_query($db, $queryFriend)
         or die('Error ' . mysqli_error($db) . 'with query ' . $queryFriend);
 
-        print_r($resultFriend);
+        echo "<script>
+ alert('Registratie gelukt, log in om verder te gaan')
+            setTimeout(() => {
+              window.location.href = 'index.php'
+            }, 300); 
+          </script>";
 
-        header('location: login.php');
         exit;
 
     }
