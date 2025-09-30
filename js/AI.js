@@ -1,3 +1,7 @@
+document.addEventListener("DOMContentLoaded", () => {
+    sendMessage();
+});
+
 document.getElementById("chat-header").onclick = () => {
     const widget = document.getElementById("chat-widget");
     const icon = document.querySelector("#chat-header svg");
@@ -18,29 +22,27 @@ document.getElementById("chat-header").onclick = () => {
 
 
 async function sendMessage() {
-    const userText = document.getElementById("userInput").value;
     const chatBox = document.getElementById("chat-box");
 
-    if (!userText.trim()) return;
-
-    // Voeg bericht van gebruiker toe
-    const userMsg = document.createElement("div");
-    userMsg.classList.add("message", "user");
-    userMsg.textContent = userText;
-    chatBox.appendChild(userMsg);
+    // Voeg placeholder bericht toe (optioneel)
+    const botLoading = document.createElement("div");
+    botLoading.classList.add("message", "bot");
+    botLoading.textContent = "🔍 Getting personalized suggestions...";
+    chatBox.appendChild(botLoading);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    document.getElementById("userInput").value = "";
-
-    // Verstuur naar server
+    // Verstuur naar server (no user input, just fixed message)
     const response = await fetch("./php/chatbot.php", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: userText})
+        body: JSON.stringify({message: "Give me personalized book recommendations"})
     });
 
     const data = await response.json();
     console.log("API response:", data);
+
+    // Haal loading weg
+    botLoading.remove();
 
     // Voeg bericht van bot toe
     const botMsg = document.createElement("div");
@@ -55,4 +57,3 @@ async function sendMessage() {
     chatBox.appendChild(botMsg);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
-
