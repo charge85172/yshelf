@@ -20,52 +20,53 @@ or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
 $user = mysqli_fetch_assoc($result_users);
 $user_id = $user['id'];
 
-    // Function to get book details from Google Books API (moved outside to be reusable)
-    function getBookDetailsFromAPI($bookLink) {
-        // Handle both volume links and search links
-        if (strpos($bookLink, '/volumes/') !== false) {
-            // Direct volume link
-            $apiUrl = $bookLink;
-        } else if (strpos($bookLink, 'volumes?q=') !== false) {
-            // Search link - get the first result
-            $apiUrl = $bookLink;
-        } else {
-            return null;
-        }
+// Function to get book details from Google Books API (moved outside to be reusable)
+function getBookDetailsFromAPI($bookLink)
+{
+    // Handle both volume links and search links
+    if (strpos($bookLink, '/volumes/') !== false) {
+        // Direct volume link
+        $apiUrl = $bookLink;
+    } else if (strpos($bookLink, 'volumes?q=') !== false) {
+        // Search link - get the first result
+        $apiUrl = $bookLink;
+    } else {
+        return null;
+    }
 
-        $ch = curl_init($apiUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Reduced to 5 seconds
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // 3 second connection timeout
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        $response = curl_exec($ch);
-        
-        if (curl_errno($ch)) {
-            curl_close($ch);
-            return null; // Return null on any cURL error
-        }
-        
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $ch = curl_init($apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Reduced to 5 seconds
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // 3 second connection timeout
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
         curl_close($ch);
+        return null; // Return null on any cURL error
+    }
 
-        if (!$response || $httpCode !== 200) {
-            return null;
-        }
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-        $data = json_decode($response, true);
-        
-        if (isset($data['volumeInfo'])) {
-            // Direct volume response
-            $volumeInfo = $data['volumeInfo'];
-        } else if (isset($data['items'][0]['volumeInfo'])) {
-            // Search response - get first item
-            $volumeInfo = $data['items'][0]['volumeInfo'];
-        } else {
-            return null;
-        }
-        
-        return [
+    if (!$response || $httpCode !== 200) {
+        return null;
+    }
+
+    $data = json_decode($response, true);
+
+    if (isset($data['volumeInfo'])) {
+        // Direct volume response
+        $volumeInfo = $data['volumeInfo'];
+    } else if (isset($data['items'][0]['volumeInfo'])) {
+        // Search response - get first item
+        $volumeInfo = $data['items'][0]['volumeInfo'];
+    } else {
+        return null;
+    }
+
+    return [
             'title' => $volumeInfo['title'] ?? 'Unknown Title',
             'author' => $volumeInfo['authors'][0] ?? 'Unknown Author',
             'genre' => isset($volumeInfo['categories']) ? $volumeInfo['categories'][0] : 'Unknown Genre',
@@ -73,11 +74,12 @@ $user_id = $user['id'];
             'description' => $volumeInfo['description'] ?? '',
             'preview_link' => $volumeInfo['previewLink'] ?? $bookLink,
             'link' => $bookLink
-        ];
-    }
+    ];
+}
 
-    // Function to get AI recommendations
-function getAIRecommendations($user_id, $db) {
+// Function to get AI recommendations
+function getAIRecommendations($user_id, $db)
+{
     // Get user preferences (same logic as chatbot.php)
     $query = "SELECT `id`, `username`, `taste`, `description`, `genres` 
               FROM `users` WHERE id = $user_id";
@@ -89,12 +91,13 @@ function getAIRecommendations($user_id, $db) {
     $genres = $row['genres'];
 
     // Function to fetch books from database and get their details
-    function fetchBooks($db, $userId, $column) {
+    function fetchBooks($db, $userId, $column)
+    {
         $books = [];
         $query = "SELECT `book_link` FROM `user_books` WHERE user_id = $userId AND $column = 1";
         $result = mysqli_query($db, $query)
         or die('Error: ' . mysqli_error($db) . ' with query ' . $query);
-        
+
         while ($row = mysqli_fetch_assoc($result)) {
             $bookLink = $row['book_link'];
             if (!empty($bookLink)) {
@@ -116,7 +119,8 @@ function getAIRecommendations($user_id, $db) {
     $recommendedBooks = fetchBooks($db, $user_id, "is_recommended");
 
     // Helper function to format book details for AI
-    function formatBooksForAI($books) {
+    function formatBooksForAI($books)
+    {
         if (empty($books)) {
             return "None";
         }
@@ -129,20 +133,20 @@ function getAIRecommendations($user_id, $db) {
 
     // System prompt with detailed book information
     $systemPrompt = "The user has the following reading preferences: " .
-        "Favorite genres: " . $genres . ". " .
-        "Books read: " . formatBooksForAI($readBooks) . ". " .
-        "Books to read: " . formatBooksForAI($unreadBooks) . ". " .
-        "Books currently reading: " . formatBooksForAI($readingBooks) . ". " .
-        "Favorite books: " . formatBooksForAI($favoriteBooks) . ". " .
-        "Discarded books: " . formatBooksForAI($discardedBooks) . ". " .
-        "Previously recommended books: " . formatBooksForAI($recommendedBooks) . ". " .
-        "Based on this detailed reading history, provide 6 personalized book recommendations. " .
-        "Make sure to only recommend books that are NOT already in the user's library. " .
-        "Consider the genres, authors, and themes from their reading history. " .
-        "Dont give me the same books twice or different editions of the same book, recommend me new books. " .
-        "Provide the book title and author separated by a pipe character (|). " .
-        "Do NOT include numbers, bullets, or any prefixes before the book titles. " .
-        "Format: 
+            "Favorite genres: " . $genres . ". " .
+            "Books read: " . formatBooksForAI($readBooks) . ". " .
+            "Books to read: " . formatBooksForAI($unreadBooks) . ". " .
+            "Books currently reading: " . formatBooksForAI($readingBooks) . ". " .
+            "Favorite books: " . formatBooksForAI($favoriteBooks) . ". " .
+            "Discarded books: " . formatBooksForAI($discardedBooks) . ". " .
+            "Previously recommended books: " . formatBooksForAI($recommendedBooks) . ". " .
+            "Based on this detailed reading history, provide 6 personalized book recommendations. " .
+            "Make sure to only recommend books that are NOT already in the user's library. " .
+            "Consider the genres, authors, and themes from their reading history. " .
+            "Dont give me the same books twice or different editions of the same book, recommend me new books. " .
+            "Provide the book title and author separated by a pipe character (|). " .
+            "Do NOT include numbers, bullets, or any prefixes before the book titles. " .
+            "Format: 
         Book Title|Author Name
         Another Book Title|Another Author Name
         Yet Another Book|Another Author
@@ -161,16 +165,16 @@ function getAIRecommendations($user_id, $db) {
     // Call OpenAI API
     $ch = curl_init("https://api.openai.com/v1/chat/completions");
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Content-Type: application/json",
-        "Authorization: Bearer " . $apiKey
+            "Content-Type: application/json",
+            "Authorization: Bearer " . $apiKey
     ]);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([
-        "model" => "gpt-4o-mini",
-        "messages" => [
-            ["role" => "system", "content" => $systemPrompt],
-            ["role" => "user", "content" => "Can you give me 6 personalized book recommendations based on my reading history?"]
-        ]
+            "model" => "gpt-4o-mini",
+            "messages" => [
+                    ["role" => "system", "content" => $systemPrompt],
+                    ["role" => "user", "content" => "Can you give me 6 personalized book recommendations based on my reading history?"]
+            ]
     ]));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -182,13 +186,13 @@ function getAIRecommendations($user_id, $db) {
     }
 
     $data = json_decode($response, true);
-    
+
     if (!isset($data['choices'][0]['message']['content'])) {
         return [];
     }
 
     $content = $data['choices'][0]['message']['content'];
-    
+
     // Extract book titles and authors from response
     $bookData = [];
     $lines = explode("\n", $content);
@@ -199,15 +203,15 @@ function getAIRecommendations($user_id, $db) {
             if (count($parts) === 2) {
                 $title = trim($parts[0]);
                 $author = trim($parts[1]);
-                
+
                 // Remove any numbers, bullets, or prefixes from the title
                 $title = preg_replace('/^[\d\.\-\*\•\s]+/', '', $title);
                 $title = trim($title);
-                
+
                 // Remove any numbers, bullets, or prefixes from the author
                 $author = preg_replace('/^[\d\.\-\*\•\s]+/', '', $author);
                 $author = trim($author);
-                
+
                 if (!empty($title) && !empty($author)) {
                     $bookData[] = ['title' => $title, 'author' => $author];
                 }
@@ -219,11 +223,11 @@ function getAIRecommendations($user_id, $db) {
     $recommendations = [];
     foreach (array_slice($bookData, 0, 6) as $book) {
         $recommendations[] = [
-            'title' => $book['title'],
-            'author' => $book['author'],
-            'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=' . urlencode(substr($book['title'], 0, 15)),
-            'description' => 'AI Recommended Book',
-            'preview_link' => '#'
+                'title' => $book['title'],
+                'author' => $book['author'],
+                'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=' . urlencode(substr($book['title'], 0, 15)),
+                'description' => 'AI Recommended Book',
+                'preview_link' => '#'
         ];
     }
 
@@ -232,19 +236,20 @@ function getAIRecommendations($user_id, $db) {
 
 
 // Enhanced cache system with 5-minute intervals
-function getCachedRecommendations($user_id, $db) {
+function getCachedRecommendations($user_id, $db)
+{
     $cacheFile = __DIR__ . "/cache/recommendations_$user_id.json";
     $cacheTime = 300; // 5 minutes cache (300 seconds)
-    
+
     // Create cache directory if it doesn't exist
     if (!is_dir(__DIR__ . "/cache")) {
         mkdir(__DIR__ . "/cache", 0755, true);
     }
-    
+
     // Check if cache file exists and is still valid
     if (file_exists($cacheFile)) {
         $cacheAge = time() - filemtime($cacheFile);
-        
+
         if ($cacheAge < $cacheTime) {
             // Cache is still valid
             $cached = json_decode(file_get_contents($cacheFile), true);
@@ -267,39 +272,40 @@ function getCachedRecommendations($user_id, $db) {
     } else {
         error_log("CACHE MISS: No cache file found for user $user_id");
     }
-    
+
     // Cache miss or expired - get new recommendations
     error_log("CACHE MISS: Calling AI for user $user_id");
     $recommendations = getAIRecommendations($user_id, $db);
-    
+
     // Save new recommendations to cache
     $cacheData = [
-        'timestamp' => time(),
-        'user_id' => $user_id,
-        'recommendations' => $recommendations,
-        'cache_duration' => $cacheTime
+            'timestamp' => time(),
+            'user_id' => $user_id,
+            'recommendations' => $recommendations,
+            'cache_duration' => $cacheTime
     ];
-    
+
     $success = file_put_contents($cacheFile, json_encode($cacheData, JSON_PRETTY_PRINT));
-    
+
     if ($success) {
         error_log("CACHE SAVED: Recommendations cached for user $user_id");
     } else {
         error_log("CACHE ERROR: Failed to save recommendations for user $user_id");
     }
-    
+
     return $recommendations;
 }
 
 // Function to load only cached recommendations (no API calls)
-function getCachedRecommendationsOnly($user_id, $db) {
+function getCachedRecommendationsOnly($user_id, $db)
+{
     $cacheFile = __DIR__ . "/cache/recommendations_$user_id.json";
-    
+
     // Create cache directory if it doesn't exist
     if (!is_dir(__DIR__ . "/cache")) {
         mkdir(__DIR__ . "/cache", 0755, true);
     }
-    
+
     // Check if cache file exists
     if (file_exists($cacheFile)) {
         $cached = json_decode(file_get_contents($cacheFile), true);
@@ -314,7 +320,7 @@ function getCachedRecommendationsOnly($user_id, $db) {
             }
         }
     }
-    
+
     // Return empty array if no cache (will be populated by AJAX)
     error_log("NO CACHE: Returning empty recommendations for user $user_id");
     return [];
@@ -324,12 +330,13 @@ function getCachedRecommendationsOnly($user_id, $db) {
 $aiRecommendations = getCachedRecommendationsOnly($user_id, $db);
 
 // Function to get books for specific shelf with cached details
-function getBooksForShelf($db, $user_id, $column) {
+function getBooksForShelf($db, $user_id, $column)
+{
     $books = [];
     $query = "SELECT `book_link` FROM `user_books` WHERE user_id = $user_id AND $column = 1";
     $result = mysqli_query($db, $query)
     or die('Error: ' . mysqli_error($db) . ' with query ' . $query);
-    
+
     while ($row = mysqli_fetch_assoc($result)) {
         $bookLink = $row['book_link'];
         if (!empty($bookLink)) {
@@ -346,17 +353,18 @@ function getBooksForShelf($db, $user_id, $column) {
 }
 
 // Function to get cached book details (with 24-hour cache)
-function getCachedBookDetails($bookLink) {
+function getCachedBookDetails($bookLink)
+{
     // Create a safe filename from the book link
     $cacheKey = md5($bookLink);
     $cacheFile = __DIR__ . "/cache/book_details_{$cacheKey}.json";
     $cacheTime = 86400; // 24 hours cache
-    
+
     // Create cache directory if it doesn't exist
     if (!is_dir(__DIR__ . "/cache")) {
         mkdir(__DIR__ . "/cache", 0755, true);
     }
-    
+
     // Check if cache exists and is still valid
     if (file_exists($cacheFile)) {
         $cacheAge = time() - filemtime($cacheFile);
@@ -367,14 +375,14 @@ function getCachedBookDetails($bookLink) {
             }
         }
     }
-    
+
     // Cache miss or expired - get fresh data
     $bookDetails = getBookDetailsFromAPI($bookLink);
     if ($bookDetails) {
         // Save to cache
         file_put_contents($cacheFile, json_encode($bookDetails, JSON_PRETTY_PRINT));
     }
-    
+
     return $bookDetails;
 }
 
@@ -401,24 +409,25 @@ if ($fastLoadingMode) {
 }
 
 // Fast loading function (no API calls)
-function getBooksForShelfFast($db, $user_id, $column) {
+function getBooksForShelfFast($db, $user_id, $column)
+{
     $books = [];
     $query = "SELECT `book_link` FROM `user_books` WHERE user_id = $user_id AND $column = 1";
     $result = mysqli_query($db, $query)
     or die('Error: ' . mysqli_error($db) . ' with query ' . $query);
-    
+
     while ($row = mysqli_fetch_assoc($result)) {
         $bookLink = $row['book_link'];
         if (!empty($bookLink)) {
             // Create basic book entry without API call
             $books[] = [
-                'title' => 'Book from Collection',
-                'author' => 'Loading details...',
-                'genre' => 'Unknown',
-                'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book',
-                'description' => 'Book details will load in background',
-                'preview_link' => '#',
-                'api_link' => $bookLink
+                    'title' => 'Book from Collection',
+                    'author' => 'Loading details...',
+                    'genre' => 'Unknown',
+                    'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book',
+                    'description' => 'Book details will load in background',
+                    'preview_link' => '#',
+                    'api_link' => $bookLink
             ];
         }
     }
@@ -426,19 +435,20 @@ function getBooksForShelfFast($db, $user_id, $column) {
 }
 
 // Function with timeout protection
-function getBooksForShelfWithTimeout($db, $user_id, $column, $startTime, $maxLoadTime) {
+function getBooksForShelfWithTimeout($db, $user_id, $column, $startTime, $maxLoadTime)
+{
     $books = [];
     $query = "SELECT `book_link` FROM `user_books` WHERE user_id = $user_id AND $column = 1";
     $result = mysqli_query($db, $query)
     or die('Error: ' . mysqli_error($db) . ' with query ' . $query);
-    
+
     while ($row = mysqli_fetch_assoc($result)) {
         // Check if we're taking too long
         if ((microtime(true) - $startTime) > $maxLoadTime) {
             error_log("TIMEOUT: Stopping book loading after {$maxLoadTime} seconds");
             break;
         }
-        
+
         $bookLink = $row['book_link'];
         if (!empty($bookLink)) {
             $bookDetails = getCachedBookDetails($bookLink);
@@ -448,13 +458,13 @@ function getBooksForShelfWithTimeout($db, $user_id, $column, $startTime, $maxLoa
             } else {
                 // If API call fails, create a basic book entry
                 $books[] = [
-                    'title' => 'Loading...',
-                    'author' => 'Please wait',
-                    'genre' => 'Unknown',
-                    'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Loading',
-                    'description' => 'Book details are loading',
-                    'preview_link' => '#',
-                    'api_link' => $bookLink
+                        'title' => 'Loading...',
+                        'author' => 'Please wait',
+                        'genre' => 'Unknown',
+                        'cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Loading',
+                        'description' => 'Book details are loading',
+                        'preview_link' => '#',
+                        'api_link' => $bookLink
                 ];
             }
         }
@@ -468,27 +478,27 @@ function getBooksForShelfWithTimeout($db, $user_id, $column, $startTime, $maxLoa
 $shelves = [
         [
                 'title' => 'Plank 1: Boeken die je aan het lezen bent',
-        'books' => $readingBooks
+                'books' => $readingBooks
         ],
         [
                 'title' => 'Plank 2: Boeken die je wil lezen',
-        'books' => $unreadBooks
-    ],
-    [
-        'title' => 'Plank 3: Boeken die je hebt gelezen',
-        'books' => $readBooks
-    ],
-    [
-        'title' => 'Plank 4: Boeken die je niet meer wilt lezen',
-        'books' => $discardedBooks
-    ],
-    [
-        'title' => 'Plank 5: Je favoriete boeken',
-        'books' => $favoriteBooks
-    ],
-    [
-        'title' => 'Plank 6: Aanbevolen voor jou (AI)',
-        'books' => $aiRecommendations
+                'books' => $unreadBooks
+        ],
+        [
+                'title' => 'Plank 3: Boeken die je hebt gelezen',
+                'books' => $readBooks
+        ],
+        [
+                'title' => 'Plank 4: Boeken die je niet meer wilt lezen',
+                'books' => $discardedBooks
+        ],
+        [
+                'title' => 'Plank 5: Je favoriete boeken',
+                'books' => $favoriteBooks
+        ],
+        [
+                'title' => 'Plank 6: Aanbevolen voor jou (AI)',
+                'books' => $aiRecommendations
         ]
 ];
 ?>
@@ -497,25 +507,25 @@ $shelves = [
 // AJAX endpoint for fetching fresh recommendations
 if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
     header('Content-Type: application/json');
-    
+
     if (!isset($_SESSION['username'])) {
         echo json_encode(['error' => 'Not authenticated']);
         exit;
     }
-    
+
     $username = $_SESSION['username'];
     $sql = "SELECT id FROM `users` WHERE username = '$username'";
     $result_users = mysqli_query($db, $sql)
     or die('Error ' . mysqli_error($db) . ' with query ' . $sql);
     $user = mysqli_fetch_assoc($result_users);
     $user_id = $user['id'];
-    
+
     // Get fresh recommendations (this will make API calls if needed)
     $freshRecommendations = getCachedRecommendations($user_id, $db);
-    
+
     echo json_encode([
-        'success' => true,
-        'recommendations' => $freshRecommendations
+            'success' => true,
+            'recommendations' => $freshRecommendations
     ]);
     exit;
 }
@@ -790,9 +800,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
         }
 
         @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+            0% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.6;
+            }
         }
 
         /* --- Custom Scrollbar Styling --- */
@@ -921,9 +937,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
     <aside class="sidebar">
         <div class="menu-header">
             <h2>Menu</h2>
-            <div class="menu-icon">
-                <i class="fa-solid fa-bars"></i>
-            </div>
         </div>
         <nav>
             <a href="boekenkast.php" class="active">
@@ -980,31 +993,32 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
                     </div>
                     <div class="book-list">
                         <?php foreach ($shelf['books'] as $book): ?>
-                            <?php 
-                                $hasImage = !empty($book['cover_url']) && strpos($book['cover_url'], 'placehold.co') === false;
-                                $coverClass = $hasImage ? 'book-cover has-image' : 'book-cover';
-                                
-                                // Create search URL for AI recommendations shelf only
-                                $isRecommendationShelf = $shelf['title'] === 'Plank 6: Aanbevolen voor jou (AI)';
-                                if ($isRecommendationShelf) {
-                                    $searchUrl = 'booklist.php?search=' . urlencode($book['title']);
-                                    $clickable = true;
-                                } else {
-                                    $searchUrl = '#';
-                                    $clickable = false;
-                                }
+                            <?php
+                            $hasImage = !empty($book['cover_url']) && strpos($book['cover_url'], 'placehold.co') === false;
+                            $coverClass = $hasImage ? 'book-cover has-image' : 'book-cover';
+
+                            // Create search URL for AI recommendations shelf only
+                            $isRecommendationShelf = $shelf['title'] === 'Plank 6: Aanbevolen voor jou (AI)';
+                            if ($isRecommendationShelf) {
+                                $searchUrl = 'booklist.php?search=' . urlencode($book['title']);
+                                $clickable = true;
+                            } else {
+                                $searchUrl = '#';
+                                $clickable = false;
+                            }
                             ?>
                             <?php if ($clickable): ?>
                                 <a href="<?= $searchUrl ?>" style="text-decoration: none;">
                             <?php endif; ?>
                             <div class="<?= $coverClass ?><?= $clickable ? ' clickable' : '' ?>">
                                 <?php if ($hasImage): ?>
-                                    <img src="<?= htmlspecialchars($book['cover_url']) ?>" 
+                                    <img src="<?= htmlspecialchars($book['cover_url']) ?>"
                                          alt="<?= htmlspecialchars($book['title'] ?? 'Book cover') ?>">
                                 <?php endif; ?>
                                 <div class="book-cover-text">
                                     <div class="book-title"><?= htmlspecialchars($book['title'] ?? 'Unknown Title') ?></div>
-                                    <div class="book-author">by <?= htmlspecialchars($book['author'] ?? 'Unknown Author') ?></div>
+                                    <div class="book-author">
+                                        by <?= htmlspecialchars($book['author'] ?? 'Unknown Author') ?></div>
                                 </div>
                             </div>
                             <?php if ($clickable): ?>
@@ -1034,115 +1048,115 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if recommendations need refreshing and fetch fresh ones
-    setTimeout(function() {
-        fetchFreshRecommendations();
-    }, 1000); // Wait 1 second after page load
-});
-
-async function fetchFreshRecommendations() {
-    const loadingIndicator = document.getElementById('aiLoadingIndicator');
-    const aiShelf = document.querySelector('.shelf:nth-child(6) .book-list');
-    
-    try {
-        // Show loading indicator
-        if (loadingIndicator) {
-            loadingIndicator.style.display = 'flex';
-            loadingIndicator.classList.add('show');
-        }
-        
-        // Dim the shelf slightly
-        if (aiShelf) {
-            aiShelf.style.opacity = '0.8';
-            aiShelf.style.transition = 'opacity 0.3s ease';
-        }
-        
-        const response = await fetch('boekenkast.php?action=getFreshRecommendations');
-        const data = await response.json();
-        
-        if (data.success && data.recommendations && data.recommendations.length > 0) {
-            updateRecommendationsDisplay(data.recommendations);
-        }
-        
-        // Hide loading indicator
-        if (loadingIndicator) {
-            loadingIndicator.style.display = 'none';
-            loadingIndicator.classList.remove('show');
-        }
-        
-        // Restore shelf opacity
-        if (aiShelf) {
-            aiShelf.style.opacity = '1';
-        }
-        
-    } catch (error) {
-        console.error('Error fetching fresh recommendations:', error);
-        
-        // Hide loading indicator even on error
-        if (loadingIndicator) {
-            loadingIndicator.style.display = 'none';
-            loadingIndicator.classList.remove('show');
-        }
-        
-        // Restore shelf opacity
-        if (aiShelf) {
-            aiShelf.style.opacity = '1';
-        }
-    }
-}
-
-function updateRecommendationsDisplay(recommendations) {
-    const aiShelf = document.querySelector('.shelf:nth-child(6) .book-list');
-    if (!aiShelf) return;
-    
-    // Clear existing books
-    aiShelf.innerHTML = '';
-    
-    // Add new recommendations
-    recommendations.forEach(function(book) {
-        const bookElement = createBookElement(book);
-        aiShelf.appendChild(bookElement);
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if recommendations need refreshing and fetch fresh ones
+        setTimeout(function () {
+            fetchFreshRecommendations();
+        }, 1000); // Wait 1 second after page load
     });
-    
-    // Add smooth animation
-    aiShelf.style.opacity = '0';
-    setTimeout(() => {
-        aiShelf.style.opacity = '1';
-    }, 100);
-}
 
-function createBookElement(book) {
-    const hasImage = book.cover_url && !book.cover_url.includes('placehold.co');
-    const coverClass = hasImage ? 'book-cover has-image' : 'book-cover';
-    const isRecommendationShelf = true; // This is always true for AI recommendations
-    
-    let html = '';
-    if (isRecommendationShelf) {
-        const searchUrl = 'booklist.php?search=' + encodeURIComponent(book.title);
-        html += '<a href="' + searchUrl + '" style="text-decoration: none;">';
+    async function fetchFreshRecommendations() {
+        const loadingIndicator = document.getElementById('aiLoadingIndicator');
+        const aiShelf = document.querySelector('.shelf:nth-child(6) .book-list');
+
+        try {
+            // Show loading indicator
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'flex';
+                loadingIndicator.classList.add('show');
+            }
+
+            // Dim the shelf slightly
+            if (aiShelf) {
+                aiShelf.style.opacity = '0.8';
+                aiShelf.style.transition = 'opacity 0.3s ease';
+            }
+
+            const response = await fetch('boekenkast.php?action=getFreshRecommendations');
+            const data = await response.json();
+
+            if (data.success && data.recommendations && data.recommendations.length > 0) {
+                updateRecommendationsDisplay(data.recommendations);
+            }
+
+            // Hide loading indicator
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+                loadingIndicator.classList.remove('show');
+            }
+
+            // Restore shelf opacity
+            if (aiShelf) {
+                aiShelf.style.opacity = '1';
+            }
+
+        } catch (error) {
+            console.error('Error fetching fresh recommendations:', error);
+
+            // Hide loading indicator even on error
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+                loadingIndicator.classList.remove('show');
+            }
+
+            // Restore shelf opacity
+            if (aiShelf) {
+                aiShelf.style.opacity = '1';
+            }
+        }
     }
-    
-    html += '<div class="' + coverClass + (isRecommendationShelf ? ' clickable' : '') + '">';
-    
-    if (hasImage) {
-        html += '<img src="' + book.cover_url + '" alt="' + (book.title || 'Book cover') + '">';
+
+    function updateRecommendationsDisplay(recommendations) {
+        const aiShelf = document.querySelector('.shelf:nth-child(6) .book-list');
+        if (!aiShelf) return;
+
+        // Clear existing books
+        aiShelf.innerHTML = '';
+
+        // Add new recommendations
+        recommendations.forEach(function (book) {
+            const bookElement = createBookElement(book);
+            aiShelf.appendChild(bookElement);
+        });
+
+        // Add smooth animation
+        aiShelf.style.opacity = '0';
+        setTimeout(() => {
+            aiShelf.style.opacity = '1';
+        }, 100);
     }
-    
-    html += '<div class="book-cover-text">';
-    html += '<div class="book-title">' + (book.title || 'Unknown Title') + '</div>';
-    html += '<div class="book-author">by ' + (book.author || 'Unknown Author') + '</div>';
-    html += '</div>';
-    html += '</div>';
-    
-    if (isRecommendationShelf) {
-        html += '</a>';
+
+    function createBookElement(book) {
+        const hasImage = book.cover_url && !book.cover_url.includes('placehold.co');
+        const coverClass = hasImage ? 'book-cover has-image' : 'book-cover';
+        const isRecommendationShelf = true; // This is always true for AI recommendations
+
+        let html = '';
+        if (isRecommendationShelf) {
+            const searchUrl = 'booklist.php?search=' + encodeURIComponent(book.title);
+            html += '<a href="' + searchUrl + '" style="text-decoration: none;">';
+        }
+
+        html += '<div class="' + coverClass + (isRecommendationShelf ? ' clickable' : '') + '">';
+
+        if (hasImage) {
+            html += '<img src="' + book.cover_url + '" alt="' + (book.title || 'Book cover') + '">';
+        }
+
+        html += '<div class="book-cover-text">';
+        html += '<div class="book-title">' + (book.title || 'Unknown Title') + '</div>';
+        html += '<div class="book-author">by ' + (book.author || 'Unknown Author') + '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        if (isRecommendationShelf) {
+            html += '</a>';
+        }
+
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        return div.firstChild;
     }
-    
-    const div = document.createElement('div');
-    div.innerHTML = html;
-    return div.firstChild;
-}
 </script>
 
 </body>

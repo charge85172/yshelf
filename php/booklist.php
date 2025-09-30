@@ -233,9 +233,6 @@ mysqli_close($db);
     <aside class="sidebar">
         <div class="menu-header">
             <h2>Menu</h2>
-            <div class="menu-icon">
-                <i class="fa-solid fa-bars"></i>
-            </div>
         </div>
         <nav>
             <a href="boekenkast.php">
@@ -361,11 +358,11 @@ mysqli_close($db);
         if (userBooks && userBooks.length > 0) {
             displayUserBooks(userBooks);
         }
-        
+
         // Handle search parameter from URL
         var urlParams = new URLSearchParams(window.location.search);
         var searchTerm = urlParams.get('search');
-        
+
         if (searchTerm) {
             var searchInput = document.getElementById('bookListSearchInput');
             if (searchInput) {
