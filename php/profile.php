@@ -2,12 +2,26 @@
 /** @var mysqli $db */
 require_once '../includes/database.php';
 session_start();
-$username = $_SESSION['username'];
 
-$query = "SELECT `username`, `image`, `taste`, `description`, `genres`, `id` FROM `users` WHERE username = '$username'";
+$current_user_id = $_SESSION['id'] ?? 0;
+
+$profile_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($profile_id > 0) {
+    $query = "SELECT `id`, `username`, `image`, `taste`, `description`, `genres` FROM `users` WHERE id = $profile_id";
+} else {
+    $username = $_SESSION['username'] ?? '';
+    $query = "SELECT `id`, `username`, `image`, `taste`, `description`, `genres` FROM `users` WHERE username = '$username'";
+}
+
 $result = mysqli_query($db, $query)
-or die('Error: ' . mysqli_error($db) . 'with query ' . $query);
+or die('Error: ' . mysqli_error($db) . ' with query ' . $query);
+
 $row = mysqli_fetch_assoc($result);
+
+if (!$row) {
+    die("Profiel niet gevonden.");
+}
 
 $name = $row['username'];
 $taste = $row['taste'];
@@ -16,6 +30,7 @@ $genres = $row['genres'];
 $image = $row['image'];
 $userID = $row['id'];
 ?>
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -278,9 +293,9 @@ $userID = $row['id'];
 
 
 <!-- JavaScript files -->
-<script src="js/Book.js"></script>
-<script src="js/Shelf.js"></script>
-<script src="js/UI.js"></script>
-<script src="js/app.js"></script>
+<script src="/js/Book.js"></script>
+<script src="/js/Shelf.js"></script>
+<script src="/js/UI.js"></script>
+<script src="/js/app.js"></script>
 </body>
 </html>
