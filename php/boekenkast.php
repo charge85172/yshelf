@@ -2,7 +2,8 @@
 /** @var mysqli $db */
 require_once '../includes/database.php';
 session_start();
-
+/** @var $response */
+require_once 'chatbot.php';
 if (!isset($_SESSION['username'])) {
     // Redirect to login page if not logged in
     header('Location: index.php');
@@ -23,32 +24,32 @@ $user_id = $user['id'];
 //php array om database te simuleren, dit kan straks vervangen worden door database logic.
 
 $shelves = [
-    [
-        'title' => 'Plank 1: Boeken die je aan het lezen bent',
-        'books' => [] // No books on this shelf yet, as in the mockup
-    ],
-    [
-        'title' => 'Plank 2: Boeken die je wil lezen',
-        'books' => [] // No books on this shelf yet
-    ],
-    [
-        'title' => 'Plank 3: Aanbevolen voor jou',
-        'books' => [
-            ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+A'],
-            ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+B'],
+        [
+                'title' => 'Plank 1: Boeken die je aan het lezen bent',
+                'books' => [] // No books on this shelf yet, as in the mockup
+        ],
+        [
+                'title' => 'Plank 2: Boeken die je wil lezen',
+                'books' => [] // No books on this shelf yet
+        ],
+        [
+                'title' => 'Plank 3: Aanbevolen voor jou',
+                'books' => [
+                        ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+A'],
+                        ['cover_url' => 'https://placehold.co/150x220/5F6F52/fff?text=Book+B'],
+                ]
+        ],
+        [
+                'title' => 'Plank 4: Lees opnieuw',
+                'books' => [
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+1'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+2'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+3'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+4'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+5'],
+                        ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+6'],
+                ]
         ]
-    ],
-    [
-        'title' => 'Plank 4: Lees opnieuw',
-        'books' => [
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+1'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+2'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+3'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+4'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+5'],
-            ['cover_url' => 'https://placehold.co/150x220/333/fff?text=Book+6'],
-        ]
-    ]
 ];
 ?>
 <!DOCTYPE html>
@@ -59,7 +60,7 @@ $shelves = [
     <title>Jouw Yshelf</title>
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="../js/AI.js"></script>
+    <script src="../js/AI.js" defer></script>
     <style>
         /* --- STYLING (CSS) --- */
         :root {
@@ -348,6 +349,7 @@ $shelves = [
     <main class="main-content">
         <header>
             <h1>Jouw Yshelf</h1>
+            <h2><?= $responses ?></h2>
         </header>
 
         <!-- search bar is fake, is gewoon een link die doorstuurt naar de zoekpagina -->
@@ -388,8 +390,6 @@ $shelves = [
             </div>
             <div id="chat-box"></div>
             <div id="chat-input">
-                <input type="text" id="userInput" placeholder="Typ een bericht..."/>
-                <button onclick="sendMessage()">▶</button>
             </div>
         </div>
     </main>

@@ -2,36 +2,26 @@ document.addEventListener("DOMContentLoaded", () => {
     sendMessage();
 });
 
-document.getElementById("chat-header").onclick = () => {
-    const widget = document.getElementById("chat-widget");
-    const icon = document.querySelector("#chat-header svg");
-    const title = document.getElementById("chat-title");
-
-    // toggle open/dicht
-    widget.classList.toggle("collapsed");
-
-    // toon icon als collapsed, anders tekst
-    if (widget.classList.contains("collapsed")) {
-        icon.style.display = "inline";
-        title.style.display = "none";
-    } else {
-        icon.style.display = "none";
-        title.style.display = "inline";
-    }
-};
+// document.getElementById("chat-header").onclick = () => {
+//     const widget = document.getElementById("chat-widget");
+//     const icon = document.querySelector("#chat-header svg");
+//     const title = document.getElementById("chat-title");
+//
+//     // toggle open/dicht
+//     widget.classList.toggle("collapsed");
+//
+//     // toon icon als collapsed, anders tekst
+//     if (widget.classList.contains("collapsed")) {
+//         icon.style.display = "inline";
+//         title.style.display = "none";
+//     } else {
+//         icon.style.display = "none";
+//         title.style.display = "inline";
+//     }
+// };
 
 
 async function sendMessage() {
-    const chatBox = document.getElementById("chat-box");
-
-    // Voeg placeholder bericht toe (optioneel)
-    const botLoading = document.createElement("div");
-    botLoading.classList.add("message", "bot");
-    botLoading.textContent = "🔍 Getting personalized suggestions...";
-    chatBox.appendChild(botLoading);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    // Verstuur naar server (no user input, just fixed message)
     const response = await fetch("./php/chatbot.php", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -39,21 +29,18 @@ async function sendMessage() {
     });
 
     const data = await response.json();
-    console.log("API response:", data);
+    console.log(data)
+    if (data.choices && data.choices[0]?.message?.content) {
+        const content = data.choices[0].message.content;
+        console.log("Raw content:", content);
 
-    // Haal loading weg
-    botLoading.remove();
+        // Zoek alle Google Books links
+        const links = content.match(/https:\/\/www\.googleapis\.com\/books\/v1\/volumes\/[A-Za-z0-9_-]+/g) || [];
 
-    // Voeg bericht van bot toe
-    const botMsg = document.createElement("div");
-    botMsg.classList.add("message", "bot");
-
-    if (data.choices && data.choices[0]) {
-        botMsg.textContent = data.choices[0].message.content;
+        console.log("Book recommendations:", links);
     } else {
-        botMsg.textContent = "⚠️ Fout: " + JSON.stringify(data);
+        console.log("⚠️ Geen geldige aanbevelingen ontvangen:", data);
     }
-
-    chatBox.appendChild(botMsg);
-    chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+
