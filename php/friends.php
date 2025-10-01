@@ -72,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+//E
 if (isset($_GET['friends']) && $_GET['friends'] == 1) {
     $friends = [];
 
