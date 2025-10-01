@@ -209,7 +209,7 @@ function showBooklistBookDetails(book) {
                 '<div class="detailsDescription"><strong class="detailsDescriptionTitle">Samenvatting:</strong>' +
                 (description || 'Geen beschrijving beschikbaar.') +
                 '</div></div>' +
-                '<p><strong>Genre(s):</strong> ' + (categories ? categories.join(', ') : 'Niet beschikbaar') + '</p>' +
+                '<p><strong>Genre(s):</strong> ' + (categories ? categories.slice(0, 2).join(', ') : 'Niet beschikbaar') + '</p>' +
                 '<p><strong>Pagina\'s:</strong> ' + (pageCount || 'Informatie niet beschikbaar') + '</p>' +
                 '<p><strong>Taal:</strong> ' + (language || 'Niet beschikbaar') + '</p>' +
                 '<p><strong>Release datum:</strong> ' + (publishedDate || 'Niet beschikbaar') + '</p>' +

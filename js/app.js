@@ -75,7 +75,7 @@ function displayResults(data) {
 
         data.items.forEach(book => {
 
-            const {title, authors, imageLinks} = book.volumeInfo;
+            const { title, authors, imageLinks } = book.volumeInfo;
             const bookId = book.id;
 
             // main container
@@ -120,7 +120,7 @@ function displayResults(data) {
 const modal = document.getElementById("myModal");
 
 function displayBookDetails(book) {
-    const {title, authors, description, imageLinks, pageCount, categories, language, publishedDate} = book.volumeInfo;
+    const { title, authors, description, imageLinks, pageCount, categories, language, publishedDate } = book.volumeInfo;
     const modalContent = document.querySelector("#modalContent");
 
     const isRead = getBookReadStatus(book.id);
@@ -135,7 +135,7 @@ function displayBookDetails(book) {
             ${description || "Geen beschrijving beschikbaar."}
         </div>
     </div>
-        <p><strong>Genre(s):</strong> ${categories} </p>
+        <p><strong>Genre(s):</strong> ${categories ? (Array.isArray(categories) ? categories.slice(0, 2).join(', ') : categories) : 'Niet beschikbaar'} </p>
         <p><strong>Pagina's:</strong> ${pageCount || "Informatie niet beschikbaar"}</p>
          <p><strong>Taal:</strong> ${language} </p>
           <p><strong>Release datum:</strong> ${publishedDate} </p>
@@ -163,11 +163,11 @@ function displayBookDetails(book) {
 
 
 function scrollLeft() {
-    document.getElementById('results').scrollBy({left: -300, behavior: 'smooth'})
+    document.getElementById('results').scrollBy({ left: -300, behavior: 'smooth' })
 }
 
 function scrollRight() {
-    document.getElementById('results').scrollBy({left: 300, behavior: 'smooth'})
+    document.getElementById('results').scrollBy({ left: 300, behavior: 'smooth' })
 }
 
 function addToBookshelf(book) {

@@ -277,20 +277,24 @@ function getCachedRecommendations($user_id, $db)
     error_log("CACHE MISS: Calling AI for user $user_id");
     $recommendations = getAIRecommendations($user_id, $db);
 
-    // Save new recommendations to cache
-    $cacheData = [
-        'timestamp' => time(),
-        'user_id' => $user_id,
-        'recommendations' => $recommendations,
-        'cache_duration' => $cacheTime
-    ];
+    // Only save cache if recommendations are not empty
+    if (!empty($recommendations)) {
+        $cacheData = [
+            'timestamp' => time(),
+            'user_id' => $user_id,
+            'recommendations' => $recommendations,
+            'cache_duration' => $cacheTime
+        ];
 
-    $success = file_put_contents($cacheFile, json_encode($cacheData, JSON_PRETTY_PRINT));
+        $success = file_put_contents($cacheFile, json_encode($cacheData, JSON_PRETTY_PRINT));
 
-    if ($success) {
-        error_log("CACHE SAVED: Recommendations cached for user $user_id");
+        if ($success) {
+            error_log("CACHE SAVED: Recommendations cached for user $user_id");
+        } else {
+            error_log("CACHE ERROR: Failed to save recommendations for user $user_id");
+        }
     } else {
-        error_log("CACHE ERROR: Failed to save recommendations for user $user_id");
+        error_log("CACHE SKIPPED: No recommendations to cache for user $user_id");
     }
 
     return $recommendations;
@@ -325,6 +329,10 @@ function getCachedRecommendationsOnly($user_id, $db)
     error_log("NO CACHE: Returning empty recommendations for user $user_id");
     return [];
 }
+
+// Check if API key exists
+$env = @parse_ini_file(__DIR__ . "/.env");
+$hasApiKey = $env && !empty($env["OPENAI_API_KEY"] ?? "");
 
 // Load cached recommendations immediately (for fast page load)
 $aiRecommendations = getCachedRecommendationsOnly($user_id, $db);
@@ -813,6 +821,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
             }
         }
 
+        /* No Books Message */
+        .no-books-message {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-light);
+            opacity: 0.9;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin: 20px;
+        }
+
         /* --- Custom Scrollbar Styling --- */
         ::-webkit-scrollbar {
             width: 12px;
@@ -971,12 +990,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
             color: var(--text-light);
             margin-bottom: 15px;
             margin-top: 10px;
+            font-size: 1.3em;
+            display: block;
+            clear: both;
         }
 
         .book-modal-content .detailsAuthor {
             color: var(--text-light);
             margin-bottom: 20px;
+            margin-top: 0;
             opacity: 0.9;
+            font-size: 0.9em;
+            display: block;
         }
 
         .book-modal-content .detailsContainer {
@@ -1143,6 +1168,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
                         <a href="#">&gt;</a>
                     </div>
                     <div class="book-list">
+                        <?php if ($shelf['title'] === 'Plank 6: Aanbevolen voor jou (AI)' && empty($shelf['books'])): ?>
+                            <div class="no-books-message">
+                                <?php if (!$hasApiKey): ?>
+                                    <p style="margin: 0;">⚠️ AI-aanbevelingen zijn niet beschikbaar</p>
+                                    <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.8;">
+                                        Er is geen OpenAI API-sleutel geconfigureerd. Voeg een API-sleutel toe aan het .env bestand om persoonlijke boekaanbevelingen te ontvangen.
+                                    </p>
+                                <?php else: ?>
+                                    <p style="margin: 0;">📚 Geen aanbevelingen beschikbaar</p>
+                                    <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.8;">
+                                        Voeg wat boeken toe aan je leeslijst en markeer je favorieten, dan kan de AI persoonlijke aanbevelingen voor je genereren!
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                         <?php foreach ($shelf['books'] as $book): ?>
                             <?php
                             $hasImage = !empty($book['cover_url']) && strpos($book['cover_url'], 'placehold.co') === false;
@@ -1395,7 +1435,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
                     '<div class="detailsDescription"><strong class="detailsDescriptionTitle">Samenvatting:</strong>' +
                     (description || 'Geen beschrijving beschikbaar.') +
                     '</div></div>' +
-                    '<p><strong>Genre(s):</strong> ' + (categories ? categories.join(', ') : 'Niet beschikbaar') + '</p>' +
+                    '<p><strong>Genre(s):</strong> ' + (categories ? categories.slice(0, 2).join(', ') : 'Niet beschikbaar') + '</p>' +
                     '<p><strong>Pagina\'s:</strong> ' + (pageCount || 'Informatie niet beschikbaar') + '</p>' +
                     '<p><strong>Taal:</strong> ' + (language || 'Niet beschikbaar') + '</p>' +
                     '<p><strong>Release datum:</strong> ' + (publishedDate || 'Niet beschikbaar') + '</p>' +

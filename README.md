@@ -1,3 +1,5 @@
+DISCLAIMER! API KEY WORDT NIET BIJ DIT PRODUCT GELEVERD EN ZUL JE ZELF MOETEN TOEVOEGEN IN EEN .env BESTAND IN DE PHP FOLDER
+
 # 📚 YShelf
 
 ![Built with JavaScript](https://img.shields.io/badge/Built%20with-JavaScript-yellow)  
