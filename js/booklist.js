@@ -326,6 +326,9 @@ function addBookToCollection(book) {
 function checkBookInCollection(apiLink, callback) {
     fetch('booklist.php?action=checkBook&apiLink=' + encodeURIComponent(apiLink))
         .then(function (response) {
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
             return response.json();
         })
         .then(function (data) {
@@ -340,6 +343,9 @@ function checkBookInCollection(apiLink, callback) {
 function getRecommendedCount(callback) {
     fetch('booklist.php?action=getRecommendedCount')
         .then(function (response) {
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
             return response.json();
         })
         .then(function (data) {
@@ -415,6 +421,15 @@ document.addEventListener('DOMContentLoaded', function () {
             hideSearchResults();
         }
     });
+
+    // Check if there's a search parameter in the URL (from profile recommendations)
+    var urlParams = new URLSearchParams(window.location.search);
+    var searchParam = urlParams.get('search');
+    if (searchParam && searchInput) {
+        searchInput.value = searchParam;
+        searchBooksAPI(searchParam);
+        showSearchResults();
+    }
 });
 
 function displayUserBooks(userBooks) {
@@ -540,9 +555,17 @@ function changeBookStatus(book, status) {
 function refreshBookList() {
     fetch('booklist.php?action=getBooks')
         .then(function (response) {
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
             return response.json();
         })
         .then(function (userBooks) {
+            if (!Array.isArray(userBooks)) {
+                console.error('Invalid response format:', userBooks);
+                return;
+            }
+
             document.querySelectorAll('.booklist-unread-container, .booklist-reading-container, .booklist-read-container, .booklist-stopped-container, .booklist-favorites-container, .booklist-recommended-container').forEach(container => {
                 container.innerHTML = '';
             });
@@ -554,6 +577,7 @@ function refreshBookList() {
         })
         .catch(function (error) {
             console.error('Error refreshing book list:', error);
+            alert('Er is een fout opgetreden bij het laden van je boeken. Probeer de pagina te vernieuwen.');
         });
 }
 

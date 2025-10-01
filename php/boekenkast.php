@@ -929,6 +929,155 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
             background-color: var(--bg-sidebar-active);
         }
 
+        /* Book Details Modal */
+        .book-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .book-modal-content {
+            background-color: var(--bg-container);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            color: var(--text-light);
+        }
+
+        .book-modal-content .close {
+            color: var(--text-light);
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+
+        .book-modal-content .close:hover {
+            color: #ffb6c1;
+        }
+
+        .book-modal-content h2 {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .book-modal-content .detailsAuthor {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .book-modal-content .detailsContainer {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .book-modal-content .detailsImg {
+            width: 150px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .book-modal-content .detailsDescription {
+            flex: 1;
+            color: var(--text-light);
+            line-height: 1.6;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .book-modal-content .detailsDescription::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .book-modal-content .detailsDescription::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .book-modal-content .detailsDescription::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .book-modal-content .detailsDescription::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .book-modal-content .detailsDescriptionTitle {
+            display: block;
+            margin-bottom: 10px;
+            color: #ffb6c1;
+        }
+
+        .book-modal-content p {
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .book-modal-content strong {
+            color: #ffb6c1;
+        }
+
+        .book-status-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .detailPageButton {
+            padding: 10px 20px;
+            background-color: var(--bg-sidebar);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .detailPageButton:hover:not(:disabled) {
+            background-color: var(--bg-sidebar-active);
+        }
+
+        .detailPageButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .detailPageButton.remove-btn {
+            background-color: #8B4513;
+        }
+
+        .detailPageButton.remove-btn:hover {
+            background-color: #A0522D;
+        }
+
+        #addToShelfBtn {
+            background-color: #ffb6c1;
+            width: 100%;
+        }
+
+        #addToShelfBtn:hover {
+            background-color: #ff8fab;
+        }
+
     </style>
 </head>
 <body>
@@ -1001,30 +1150,34 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
 
                             // Create search URL for AI recommendations shelf only
                             $isRecommendationShelf = $shelf['title'] === 'Plank 6: Aanbevolen voor jou (AI)';
-                            if ($isRecommendationShelf) {
-                                $searchUrl = 'booklist.php?search=' . urlencode($book['title']);
-                                $clickable = true;
-                            } else {
-                                $searchUrl = '#';
-                                $clickable = false;
-                            }
                             ?>
-                            <?php if ($clickable): ?>
-                                <a href="<?= $searchUrl ?>" style="text-decoration: none;">
-                            <?php endif; ?>
-                            <div class="<?= $coverClass ?><?= $clickable ? ' clickable' : '' ?>">
-                                <?php if ($hasImage): ?>
-                                    <img src="<?= htmlspecialchars($book['cover_url']) ?>"
-                                         alt="<?= htmlspecialchars($book['title'] ?? 'Book cover') ?>">
-                                <?php endif; ?>
-                                <div class="book-cover-text">
-                                    <div class="book-title"><?= htmlspecialchars($book['title'] ?? 'Unknown Title') ?></div>
-                                    <div class="book-author">
-                                        by <?= htmlspecialchars($book['author'] ?? 'Unknown Author') ?></div>
-                                </div>
-                            </div>
-                            <?php if ($clickable): ?>
+                            <?php if ($isRecommendationShelf): ?>
+                                <a href="booklist.php?search=<?= urlencode($book['title']) ?>" style="text-decoration: none;">
+                                    <div class="<?= $coverClass ?> clickable">
+                                        <?php if ($hasImage): ?>
+                                            <img src="<?= htmlspecialchars($book['cover_url']) ?>"
+                                                 alt="<?= htmlspecialchars($book['title'] ?? 'Book cover') ?>">
+                                        <?php endif; ?>
+                                        <div class="book-cover-text">
+                                            <div class="book-title"><?= htmlspecialchars($book['title'] ?? 'Unknown Title') ?></div>
+                                            <div class="book-author">
+                                                by <?= htmlspecialchars($book['author'] ?? 'Unknown Author') ?></div>
+                                        </div>
+                                    </div>
                                 </a>
+                            <?php else: ?>
+                                <div class="<?= $coverClass ?> clickable" 
+                                     onclick="showBookDetails('<?= htmlspecialchars($book['api_link'], ENT_QUOTES) ?>')">
+                                    <?php if ($hasImage): ?>
+                                        <img src="<?= htmlspecialchars($book['cover_url']) ?>"
+                                             alt="<?= htmlspecialchars($book['title'] ?? 'Book cover') ?>">
+                                    <?php endif; ?>
+                                    <div class="book-cover-text">
+                                        <div class="book-title"><?= htmlspecialchars($book['title'] ?? 'Unknown Title') ?></div>
+                                        <div class="book-author">
+                                            by <?= htmlspecialchars($book['author'] ?? 'Unknown Author') ?></div>
+                                    </div>
+                                </div>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
@@ -1047,6 +1200,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
         </div> -->
     </main>
 
+</div>
+
+<!-- Book Details Modal -->
+<div id="bookModal" class="book-modal">
+    <div class="book-modal-content" id="bookModalContent">
+        <!-- Content will be populated by JavaScript -->
+    </div>
 </div>
 
 <script>
@@ -1158,6 +1318,230 @@ if (isset($_GET['action']) && $_GET['action'] === 'getFreshRecommendations') {
         const div = document.createElement('div');
         div.innerHTML = html;
         return div.firstChild;
+    }
+
+    // Book Details Modal Functions (similar to profile.php)
+    function showBookDetails(apiLink) {
+        fetch(apiLink)
+            .then(response => response.json())
+            .then(book => {
+                displayBookModal(book);
+            })
+            .catch(error => {
+                console.error('Error fetching book details:', error);
+                alert('Er is een fout opgetreden bij het ophalen van de boekgegevens.');
+            });
+    }
+
+    function displayBookModal(book) {
+        const title = book.volumeInfo.title || 'Geen titel';
+        const authors = book.volumeInfo.authors;
+        const description = book.volumeInfo.description;
+        const imageLinks = book.volumeInfo.imageLinks;
+        const pageCount = book.volumeInfo.pageCount;
+        const categories = book.volumeInfo.categories;
+        const language = book.volumeInfo.language;
+        const publishedDate = book.volumeInfo.publishedDate;
+        const bookLink = book.selfLink;
+
+        checkBookInCollection(bookLink, function(bookData) {
+            const isInCollection = bookData.exists;
+            const currentStatus = bookData.status;
+            const isRecommended = bookData.isRecommended;
+
+            getRecommendedCount(function(countData) {
+                let buttonHTML = '';
+                if (isInCollection) {
+                    buttonHTML = '<div class="book-status-buttons">';
+                    if (currentStatus !== 'unread') {
+                        buttonHTML += '<button class="detailPageButton" onclick="changeBookStatus(\'' + bookLink + '\', \'unread\')">📚 Te lezen</button>';
+                    }
+                    if (currentStatus !== 'read') {
+                        buttonHTML += '<button class="detailPageButton" onclick="changeBookStatus(\'' + bookLink + '\', \'read\')">✓ Gelezen</button>';
+                    }
+                    if (currentStatus !== 'reading') {
+                        buttonHTML += '<button class="detailPageButton" onclick="changeBookStatus(\'' + bookLink + '\', \'reading\')">📖 Bezig</button>';
+                    }
+                    if (currentStatus !== 'discarded') {
+                        buttonHTML += '<button class="detailPageButton" onclick="changeBookStatus(\'' + bookLink + '\', \'discarded\')">❌ Gestopt</button>';
+                    }
+                    if (currentStatus !== 'favorite') {
+                        buttonHTML += '<button class="detailPageButton" onclick="changeBookStatus(\'' + bookLink + '\', \'favorite\')">⭐ Favoriet</button>';
+                    }
+
+                    const isAtLimit = countData.count >= countData.max && !isRecommended;
+                    let recommendedButtonText;
+                    if (isRecommended) {
+                        recommendedButtonText = '💡 Niet meer aanbevelen';
+                    } else if (isAtLimit) {
+                        recommendedButtonText = '💡 Maximaal 6 aanbevelingen (' + countData.count + '/' + countData.max + ')';
+                    } else {
+                        recommendedButtonText = '💡 Aanbevolen (' + countData.count + '/' + countData.max + ')';
+                    }
+                    buttonHTML += '<button class="detailPageButton" onclick="changeBookStatus(\'' + bookLink + '\', \'recommended\')" ' + (isAtLimit ? 'disabled' : '') + '>' + recommendedButtonText + '</button>';
+                    buttonHTML += '<button class="detailPageButton remove-btn" onclick="removeBook(\'' + bookLink + '\')">🗑️ Verwijder uit collectie</button>';
+                    buttonHTML += '</div>';
+                } else {
+                    buttonHTML = '<button id="addToShelfBtn" class="detailPageButton" onclick="addBookToCollection(\'' + bookLink + '\')">+ Voeg toe aan leeslijst</button>';
+                }
+
+                const modalContent = document.getElementById('bookModalContent');
+                modalContent.innerHTML =
+                    '<span class="close" onclick="closeBookModal()">&times;</span>' +
+                    '<h2>' + title + '</h2>' +
+                    (authors ? '<p class="detailsAuthor"><strong>Auteur(s):</strong> ' + authors.join(', ') + '</p>' : '') +
+                    '<div class="detailsContainer">' +
+                    (imageLinks && imageLinks.thumbnail ? '<img class="detailsImg" src="' + imageLinks.thumbnail + '" alt="' + title + '">' : '') +
+                    '<div class="detailsDescription"><strong class="detailsDescriptionTitle">Samenvatting:</strong>' +
+                    (description || 'Geen beschrijving beschikbaar.') +
+                    '</div></div>' +
+                    '<p><strong>Genre(s):</strong> ' + (categories ? categories.join(', ') : 'Niet beschikbaar') + '</p>' +
+                    '<p><strong>Pagina\'s:</strong> ' + (pageCount || 'Informatie niet beschikbaar') + '</p>' +
+                    '<p><strong>Taal:</strong> ' + (language || 'Niet beschikbaar') + '</p>' +
+                    '<p><strong>Release datum:</strong> ' + (publishedDate || 'Niet beschikbaar') + '</p>' +
+                    buttonHTML;
+
+                document.getElementById('bookModal').style.display = 'block';
+            });
+        });
+    }
+
+    function closeBookModal() {
+        document.getElementById('bookModal').style.display = 'none';
+    }
+
+    function checkBookInCollection(apiLink, callback) {
+        fetch('booklist.php?action=checkBook&apiLink=' + encodeURIComponent(apiLink))
+            .then(response => response.json())
+            .then(data => callback(data))
+            .catch(error => {
+                console.error('Error checking book:', error);
+                callback({ exists: false, status: null, isRecommended: false });
+            });
+    }
+
+    function getRecommendedCount(callback) {
+        fetch('booklist.php?action=getRecommendedCount')
+            .then(response => response.json())
+            .then(data => callback(data))
+            .catch(error => {
+                console.error('Error getting recommended count:', error);
+                callback({ count: 0, max: 6 });
+            });
+    }
+
+    function addBookToCollection(apiLink) {
+        const bookData = new URLSearchParams({
+            action: 'addBook',
+            apiLink: apiLink
+        });
+
+        fetch('booklist.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bookData
+        })
+        .then(response => response.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert('Boek succesvol toegevoegd aan je collectie!');
+                    closeBookModal();
+                    // Reload the page to show the new book
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Er is iets misgegaan bij het toevoegen van het boek.');
+                }
+            } catch (e) {
+                console.error('Parse error:', e, text);
+                alert('Er is een fout opgetreden bij het toevoegen van het boek.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Er is een fout opgetreden bij het toevoegen van het boek.');
+        });
+    }
+
+    function changeBookStatus(apiLink, status) {
+        const bookData = new URLSearchParams({
+            action: 'changeStatus',
+            apiLink: apiLink,
+            status: status
+        });
+
+        fetch('booklist.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bookData
+        })
+        .then(response => response.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert('Boekstatus bijgewerkt!');
+                    // Reload the page to show updated shelves
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Er is iets misgegaan bij het bijwerken van de status.');
+                }
+            } catch (e) {
+                console.error('Parse error:', e, text);
+                alert('Er is een fout opgetreden bij het bijwerken van de status.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Er is een fout opgetreden bij het bijwerken van de status.');
+        });
+    }
+
+    function removeBook(apiLink) {
+        if (!confirm('Weet je zeker dat je dit boek uit je collectie wilt verwijderen?')) {
+            return;
+        }
+
+        const bookData = new URLSearchParams({
+            action: 'removeBook',
+            apiLink: apiLink
+        });
+
+        fetch('booklist.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: bookData
+        })
+        .then(response => response.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert('Boek verwijderd uit je collectie!');
+                    closeBookModal();
+                    // Reload the page to update shelves
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Er is iets misgegaan bij het verwijderen van het boek.');
+                }
+            } catch (e) {
+                console.error('Parse error:', e, text);
+                alert('Er is een fout opgetreden bij het verwijderen van het boek.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Er is een fout opgetreden bij het verwijderen van het boek.');
+        });
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function(event) {
+        const bookModal = document.getElementById('bookModal');
+        if (event.target == bookModal) {
+            closeBookModal();
+        }
     }
 </script>
 

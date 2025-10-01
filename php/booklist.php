@@ -3,9 +3,18 @@
 require_once '../includes/database.php';
 session_start();
 
+// Check if this is an AJAX request
+$isAjax = isset($_GET['action']) || isset($_POST['action']);
+
 if (!isset($_SESSION['username'])) {
-    // Redirect to login page if not logged in
-    header('Location: index.php');
+    // For AJAX requests, return JSON error instead of redirecting
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Not authenticated']);
+        exit();
+    }
+    // For page requests, redirect to login
+    header('Location: ../index.php');
     exit();
 }
 require_once '../includes/database.php';
